@@ -178,148 +178,37 @@ placeholder="Password">
 <h2>👨‍🌾 Farm Management Centre</h2>
 
 <div class="notice">
-Manage farm operations and submit authorised farm updates.
+Manage farm operations, employees and productivity.
 </div>
 
-<h3>Record Farm Activity</h3>
+<h3>Assign Employee Task</h3>
 
-<form id="farmRecordForm">
+<form id="assignTaskForm">
 
-<label>Activity Title</label>
-<input id="farmTitle" type="text"
-placeholder="e.g. Potato planting" required>
-
-<label>Farm Module</label>
-<select id="farmModule" required>
-<option value="">Select module</option>
-<option value="Crop Production">Crop Production</option>
-<option value="Livestock">Livestock</option>
-<option value="Irrigation">Irrigation</option>
-<option value="Harvesting">Harvesting</option>
-<option value="Machinery">Farm Machinery</option>
-<option value="Employees">Employees</option>
-<option value="Other">Other</option>
+<select id="taskEmployee" required>
+<option value="">Select Employee</option>
 </select>
 
-<label>Activity Details</label>
-<textarea id="farmDetails"
-placeholder="Describe the farm activity" required></textarea>
+<input id="taskTitle" placeholder="Task title" required>
 
-<label>Quantity</label>
-<input id="farmQuantity" type="number"
-step="0.01" min="0" placeholder="Enter quantity">
+<textarea id="taskDetails"
+placeholder="Task instructions"></textarea>
 
-<label>Unit</label>
-<input id="farmUnit" type="text"
-placeholder="e.g. kg, acres, litres, bags">
+<input id="taskDueDate" type="date">
 
-<button type="submit">Save Farm Record</button>
+<button type="submit">Assign Task</button>
 
 </form>
 
-<div id="farmStatus" class="notice"></div>
+<div id="taskAssignStatus" class="notice"></div>
 
-<h3>Farm Activity Records</h3>
+<h3>Employee Work Reports</h3>
+<div id="managerReports">Loading reports...</div>
 
-<div id="managerRecords">
-Loading records...
-</div>
+<h3>Employee Attendance</h3>
+<div id="managerAttendance">Loading attendance...</div>
 
 </section>
-
-<script>
-document.getElementById("farmRecordForm")
-.addEventListener("submit", saveFarmRecord);
-
-async function saveFarmRecord(event) {
-  event.preventDefault();
-
-  const status = document.getElementById("farmStatus");
-  status.textContent = "Saving farm record...";
-
-  const {data:authData,error:authError} =
-    await db.auth.getUser();
-
-  if (authError || !authData.user) {
-    status.textContent = "Please sign in again.";
-    return;
-  }
-
-  const record = {
-    title: document.getElementById("farmTitle").value.trim(),
-    module: document.getElementById("farmModule").value,
-    details: document.getElementById("farmDetails").value.trim(),
-    quantity: document.getElementById("farmQuantity").value
-      ? Number(document.getElementById("farmQuantity").value)
-      : null,
-    unit: document.getElementById("farmUnit").value.trim(),
-    created_by: authData.user.id
-  };
-
-  const {error} = await db
-    .from("farm_records")
-    .insert(record);
-
-  if (error) {
-    status.textContent = "Save failed: " + error.message;
-    return;
-  }
-
-  status.textContent = "Farm record saved successfully!";
-
-  document.getElementById("farmRecordForm").reset();
-
-  await loadManagerRecords();
-}
-
-async function loadManagerRecords() {
-  const display = document.getElementById("managerRecords");
-
-  const {data,error} = await db
-    .from("farm_records")
-    .select("title,module,details,quantity,unit,created_at")
-    .order("created_at", {ascending:false});
-
-  if (error) {
-    display.textContent = "Unable to load records: " + error.message;
-    return;
-  }
-
-  display.replaceChildren();
-
-  if (!data || data.length === 0) {
-    display.textContent = "No farm records available yet.";
-    return;
-  }
-
-  data.forEach(record => {
-    const card = document.createElement("div");
-    card.className = "notice";
-
-    const title = document.createElement("h3");
-    title.textContent = record.title;
-
-    const details = document.createElement("p");
-    details.textContent = record.details;
-
-    const module = document.createElement("p");
-    module.textContent = "Module: " + record.module;
-
-    const quantity = document.createElement("p");
-    quantity.textContent =
-      "Quantity: " + (record.quantity ?? "Not specified") +
-      " " + (record.unit || "");
-
-    const date = document.createElement("small");
-    date.textContent = record.created_at
-      ? new Date(record.created_at).toLocaleString()
-      : "";
-
-    card.append(title,module,details,quantity,date);
-    display.appendChild(card);
-  });
-}
-</script>
 
 <section class="card hidden" id="employeePanel">
 
@@ -780,6 +669,100 @@ async function markAttendance(action) {
   }
 
   status.textContent = "Work report submitted successfully!";
+  this.reset();
+});async function loadManagerCentre() {
+  const employeeSelect = document.getElementById("taskEmployee");
+
+  const { data: employees, error } = await db
+    .from("profiles")
+    .select("id,full_name")
+    .eq("role", "employee");
+
+  if (error) {
+    employeeSelect.innerHTML = "<option>Could not load employees</option>";
+  } else {
+    employeeSelect.innerHTML = '<option value="">Select Employee</option>';
+
+    employees.forEach(employee => {
+      const option = document.createElement("option");
+      option.value = employee.id;
+      option.textContent = employee.full_name || "Unnamed employee";
+      employeeSelect.appendChild(option);
+    });
+  }
+
+  loadManagerReports();
+  loadManagerAttendance();
+}
+
+async function loadManagerReports() {
+  const box = document.getElementById("managerReports");
+
+  const { data, error } = await db
+    .from("employee_work_reports")
+    .select("*")
+    .order("submitted_at", { ascending: false });
+
+  if (error) {
+    box.textContent = error.message;
+    return;
+  }
+
+  box.textContent = data.length
+    ? data.map(r =>
+        `${r.task_title} — ${r.task_details} — ${r.quantity || ""} ${r.unit || ""}`
+      ).join("\n")
+    : "No work reports submitted yet.";
+}
+
+async function loadManagerAttendance() {
+  const box = document.getElementById("managerAttendance");
+
+  const { data, error } = await db
+    .from("employee_attendance")
+    .select("*")
+    .order("attendance_date", { ascending: false });
+
+  if (error) {
+    box.textContent = error.message;
+    return;
+  }
+
+  box.textContent = data.length
+    ? data.map(a =>
+        `${a.employee_id} — ${a.attendance_date} — Check-in: ${a.check_in || "Not yet"} — Check-out: ${a.check_out || "Not yet"}`
+      ).join("\n")
+    : "No attendance records yet.";
+}
+
+document.getElementById("assignTaskForm")
+.addEventListener("submit", async function(event) {
+  event.preventDefault();
+
+  const status = document.getElementById("taskAssignStatus");
+  status.textContent = "Assigning task...";
+
+  const { data: auth } = await db.auth.getUser();
+
+  if (!auth.user) {
+    status.textContent = "Please log in again.";
+    return;
+  }
+
+  const { error } = await db.from("employee_tasks").insert({
+    employee_id: document.getElementById("taskEmployee").value,
+    assigned_by: auth.user.id,
+    task_title: document.getElementById("taskTitle").value,
+    task_details: document.getElementById("taskDetails").value,
+    due_date: document.getElementById("taskDueDate").value || null
+  });
+
+  if (error) {
+    status.textContent = error.message;
+    return;
+  }
+
+  status.textContent = "Task assigned successfully!";
   this.reset();
 });</script>
 
