@@ -405,12 +405,10 @@ async function showDashboard(user) {
     $("managerPanel").classList.remove("hidden");
   } else if (role === "employee") {
     $("employeePanel").classList.remove("hidden");
-  } else if (role === "farmer") {
-    $("farmerPanel").classList.remove("hidden");
-  } else {
-    $("dashboardMessage").textContent =
-      "Your account has an unrecognised role. Contact support.";
-  }
+  } } else if (role === "farmer") {
+  $("farmerPanel").classList.remove("hidden");
+  await loadFarmerDashboard();
+      }
 }
 
 async function loadUsers() {
