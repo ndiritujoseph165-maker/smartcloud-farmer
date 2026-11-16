@@ -137,8 +137,7 @@ farm finances and performance through one
 intelligent cloud-based agricultural platform.
 </p>
 </section>
-<section class="card" id="subscriptionPanel">
-
+<section class="card hidden" id="subscriptionPanel">
 <h2>🌱 SmartCloud Farmer Subscription</h2>
 
 <div class="notice">
@@ -455,7 +454,7 @@ async function showDashboard(user) {
   $("auth").classList.add("hidden");
   $("dashboard").classList.remove("hidden");
   $("dashboardMessage").textContent = "Loading your account...";
-
+$("subscriptionPanel").classList.remove("hidden");
   const {data:profile,error} = await db
     .from("profiles")
     .select("id,full_name,role")
