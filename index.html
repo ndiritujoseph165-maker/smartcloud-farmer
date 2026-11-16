@@ -482,7 +482,8 @@ async function showDashboard(user) {
 
   if (role === "administrator") {
     $("adminPanel").classList.remove("hidden");
-    await loadUsers();
+   await loadUsers();
+await loadAdminPayments(); 
 } else if (role === "manager") {
   $("managerPanel").classList.remove("hidden");
   await loadFinanceSummary();
@@ -593,7 +594,66 @@ async function loadUsers() {
   });
 
   display.replaceChildren(table);
-            }
+            }async function loadAdminPayments() {
+  const box = document.getElementById("adminPayments");
+  box.textContent = "Loading payment requests...";
+
+  const { data, error } = await db
+    .from("subscription_payments")
+    .select("id,user_id,amount,payment_phone,mpesa_reference,created_at")
+    .eq("status", "pending")
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    box.textContent = error.message;
+    return;
+  }
+
+  box.replaceChildren();
+
+  if (!data.length) {
+    box.textContent = "No pending payments.";
+    return;
+  }
+
+  data.forEach(payment => {
+    const item = document.createElement("div");
+    item.className = "notice";
+
+    const details = document.createElement("p");
+    details.textContent =
+      `Amount: KES ${payment.amount} | Phone: ${payment.payment_phone} | M-PESA: ${payment.mpesa_reference}`;
+
+    item.appendChild(details);
+
+    ["approved", "rejected"].forEach(decision => {
+      const button = document.createElement("button");
+      button.textContent = decision.toUpperCase();
+
+      button.onclick = async () => {
+        button.disabled = true;
+
+        const { error } = await db.rpc("admin_review_payment", {
+          p_payment_id: payment.id,
+          p_decision: decision
+        });
+
+        if (error) {
+          alert(error.message);
+          button.disabled = false;
+          return;
+        }
+
+        alert("Payment " + decision + ".");
+        loadAdminPayments();
+      };
+
+      item.appendChild(button);
+    });
+
+    box.appendChild(item);
+  });
+  }
 
 async function signOut() {
   const {error} = await db.auth.signOut();
