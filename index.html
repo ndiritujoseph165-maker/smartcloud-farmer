@@ -5,23 +5,209 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>SmartCloud Farmer</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <style>
 :root {
   --green:#087f45;
   --dark:#064b30;
   --light:#e9f7ef;
 }
-*{box-sizing:border-box}
-body{
+* {box-sizing:border-box}
+body {
   margin:0;
   font-family:Arial,sans-serif;
   background:#f4f8f5;
   color:#183528;
 }
-header{
+header {
   background:var(--dark);
   color:white;
-  padding:22px;
+  padding:24px;
 }
-header h1{margin:0;font-size:24px}
-header p{margin:6px 0 0;color
+header h1 {margin:0;font-size:25px}
+header p {margin:7px 0 0;color:#c9ead7}
+main {
+  max-width:950px;
+  margin:35px auto;
+  padding:15px;
+}
+.hero {
+  background:linear-gradient(135deg,#064b30,#087f45);
+  color:white;
+  padding:35px 25px;
+  border-radius:16px;
+  margin-bottom:25px;
+}
+.hero h2 {font-size:29px;margin:0 0 12px}
+.hero p {line-height:1.6}
+.card {
+  background:white;
+  padding:25px;
+  border-radius:14px;
+  box-shadow:0 4px 18px #0000000d;
+  margin-bottom:20px;
+}
+input {
+  display:block;
+  width:100%;
+  padding:14px;
+  margin:12px 0;
+  border:1px solid #d5e2d9;
+  border-radius:8px;
+  font-size:16px;
+}
+button {
+  background:var(--green);
+  color:white;
+  border:0;
+  padding:14px 20px;
+  border-radius:8px;
+  font-size:15px;
+  font-weight:bold;
+  cursor:pointer;
+  margin:5px 5px 5px 0;
+}
+button:hover {background:var(--dark)}
+.secondary {background:#365b48}
+#message {margin-top:15px;line-height:1.5}
+.hidden {display:none}
+.features {
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+  gap:15px;
+}
+.feature {
+  background:var(--light);
+  padding:20px;
+  border-radius:12px;
+}
+.feature h3 {color:var(--dark)}
+footer {
+  text-align:center;
+  padding:25px;
+  color:#668071;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+<h1>🌱 SmartCloud Farmer</h1>
+<p>Intelligent Agriculture. Measurable Growth.</p>
+</header>
+
+<main>
+
+<section class="hero">
+<h2>One Platform. Every Agricultural Activity.</h2>
+<p>
+Manage crops, livestock, employees, production,
+farm finances and performance through one
+intelligent cloud-based agricultural platform.
+</p>
+</section>
+
+<section class="card" id="auth">
+<h2>Access Your Farm</h2>
+<p>Sign in or create your account to continue.</p>
+
+<input id="email" type="email" placeholder="Email address">
+<input id="password" type="password" placeholder="Password">
+
+<button onclick="signUp()">Create Account</button>
+<button onclick="signIn()">Sign In</button>
+
+<p id="message"></p>
+</section>
+
+<section class="card hidden" id="dashboard">
+<h2>Welcome to SmartCloud Farmer</h2>
+<p id="userEmail"></p>
+<div class="features">
+<div class="feature"><h3>🌾 Crops</h3><p>Crop production management</p></div>
+<div class="feature"><h3>🐄 Livestock</h3><p>Animal and production tracking</p></div>
+<div class="feature"><h3>👨‍🌾 Employees</h3><p>Workforce performance</p></div>
+<div class="feature"><h3>📊 Analytics</h3><p>Farm performance insights</p></div>
+<div class="feature"><h3>💰 Finance</h3><p>Farm financial management</p></div>
+<div class="feature"><h3>☁️ Cloud</h3><p>Centralised farm information</p></div>
+</div>
+<button class="secondary" onclick="signOut()">Sign Out</button>
+</section>
+
+</main>
+
+<footer>
+SmartCloud Farmer © 2026 | Powered by Smart Agriculture
+</footer>
+
+<script>
+const SUPABASE_URL = "https://eeobgnmhljgxjmnghhak.supabase.co";
+const SUPABASE_KEY = "sb_publishable_hWjwCf747_np84Zz8kFKOw_HFZ9xmbm";
+
+const db = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_KEY
+);
+
+const message = document.getElementById("message");
+
+async function signUp() {
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value;
+
+  if (!email || password.length < 6) {
+    message.textContent = "Enter a valid email and password of at least 6 characters.";
+    return;
+  }
+
+  message.textContent = "Creating account...";
+
+  const {error} = await db.auth.signUp({email,password});
+
+  message.textContent = error
+    ? error.message
+    : "Account created. Check your email if confirmation is required.";
+}
+
+async function signIn() {
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value;
+
+  message.textContent = "Signing in...";
+
+  const {data,error} = await db.auth.signInWithPassword({
+    email,password
+  });
+
+  if (error) {
+    message.textContent = error.message;
+    return;
+  }
+
+  showDashboard(data.user);
+}
+
+function showDashboard(user) {
+  document.getElementById("auth").classList.add("hidden");
+  document.getElementById("dashboard").classList.remove("hidden");
+  document.getElementById("userEmail").textContent = user.email;
+}
+
+async function signOut() {
+  await db.auth.signOut();
+  document.getElementById("dashboard").classList.add("hidden");
+  document.getElementById("auth").classList.remove("hidden");
+  message.textContent = "You have signed out.";
+}
+
+async function checkSession() {
+  const {data} = await db.auth.getSession();
+  if (data.session) showDashboard(data.session.user);
+}
+
+checkSession();
+</script>
+
+</body>
+  </html>
