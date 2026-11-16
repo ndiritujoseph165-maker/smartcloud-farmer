@@ -750,7 +750,38 @@ async function markAttendance(action) {
       ? updateError.message
       : "Check-out successful!";
   }
-    }</script>
+    }document.getElementById("employeeReportForm")
+.addEventListener("submit", async function(event) {
+  event.preventDefault();
+
+  const status = document.getElementById("employeeReportStatus");
+  status.textContent = "Submitting report...";
+
+  const { data: auth } = await db.auth.getUser();
+
+  if (!auth.user) {
+    status.textContent = "Please log in again.";
+    return;
+  }
+
+  const { error } = await db
+    .from("employee_work_reports")
+    .insert({
+      employee_id: auth.user.id,
+      task_title: document.getElementById("employeeTaskTitle").value,
+      task_details: document.getElementById("employeeTaskDetails").value,
+      quantity: document.getElementById("employeeQuantity").value || null,
+      unit: document.getElementById("employeeUnit").value
+    });
+
+  if (error) {
+    status.textContent = error.message;
+    return;
+  }
+
+  status.textContent = "Work report submitted successfully!";
+  this.reset();
+});</script>
 
 </body>
 </html>
