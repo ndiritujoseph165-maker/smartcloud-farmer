@@ -370,7 +370,8 @@ async function showDashboard(user) {
 }
 
 async function loadUsers() {
-  $("userList").textContent = "Loading accounts...";
+  const display = $("userList");
+  display.textContent = "Loading accounts...";
 
   const {data,error} = await db
     .from("profiles")
@@ -378,42 +379,94 @@ async function loadUsers() {
     .order("full_name");
 
   if (error) {
-    $("userList").textContent =
-      "Unable to load accounts: " + error.message;
+    display.textContent = error.message;
     return;
   }
 
-  if (!data || data.length === 0) {
-    $("userList").textContent = "No accounts found.";
+  if (!data || !data.length) {
+    display.textContent = "No accounts found.";
     return;
   }
 
   const table = document.createElement("table");
   const heading = document.createElement("tr");
 
-  ["Name","Role","Account ID"].forEach(label => {
-    const th = document.createElement("th");
-    th.textContent = label;
-    heading.appendChild(th);
-  });
+  ["Name","Current Role","Assign Role","Action"]
+    .forEach(label => {
+      const th = document.createElement("th");
+      th.textContent = label;
+      heading.appendChild(th);
+    });
 
   table.appendChild(heading);
 
   data.forEach(user => {
     const row = document.createElement("tr");
 
-    [user.full_name || "Not provided",user.role,user.id]
-      .forEach(value => {
-        const cell = document.createElement("td");
-        cell.textContent = value || "";
-        row.appendChild(cell);
-      });
+    const name = document.createElement("td");
+    name.textContent = user.full_name || "Unnamed";
+    row.appendChild(name);
 
+    const current = document.createElement("td");
+    current.textContent = user.role;
+    row.appendChild(current);
+
+    const roleCell = document.createElement("td");
+    const select = document.createElement("select");
+
+    ["manager","employee","farmer"].forEach(role => {
+      const option = document.createElement("option");
+      option.value = role;
+      option.textContent = role;
+      select.appendChild(option);
+    });
+
+    select.value = ["manager","employee","farmer"]
+      .includes(user.role) ? user.role : "farmer";
+
+    roleCell.appendChild(select);
+    row.appendChild(roleCell);
+
+    const action = document.createElement("td");
+    const button = document.createElement("button");
+    button.textContent = "Update";
+
+    if (user.role === "administrator") {
+      select.disabled = true;
+      button.disabled = true;
+      button.textContent = "Protected";
+    } else {
+      button.onclick = async () => {
+        button.disabled = true;
+        button.textContent = "Updating...";
+
+        const {error} = await db.rpc(
+          "admin_set_user_role",
+          {
+            target_user_id: user.id,
+            new_role: select.value
+          }
+        );
+
+        if (error) {
+          alert(error.message);
+          button.disabled = false;
+          button.textContent = "Update";
+          return;
+        }
+
+        alert("User role updated successfully.");
+        await loadUsers();
+      };
+    }
+
+    action.appendChild(button);
+    row.appendChild(action);
     table.appendChild(row);
   });
 
-  $("userList").replaceChildren(table);
-}
+  display.replaceChildren(table);
+            }
 
 async function signOut() {
   const {error} = await db.auth.signOut();
