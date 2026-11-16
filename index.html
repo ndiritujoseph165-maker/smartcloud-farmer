@@ -798,6 +798,70 @@ document.getElementById("assignTaskForm")
       `${record.title} | ${record.module} | ${record.details} | ${record.quantity || ""} ${record.unit || ""}`;
     recordsBox.appendChild(item);
   });
+  }document.getElementById("financeForm")
+.addEventListener("submit", async function(event) {
+  event.preventDefault();
+
+  const status = document.getElementById("financeStatus");
+  status.textContent = "Saving transaction...";
+
+  const { data: auth } = await db.auth.getUser();
+
+  if (!auth.user) {
+    status.textContent = "Please log in again.";
+    return;
+  }
+
+  const { error } = await db.from("farm_finances").insert({
+    recorded_by: auth.user.id,
+    transaction_type: document.getElementById("financeType").value,
+    category: document.getElementById("financeCategory").value,
+    description: document.getElementById("financeDescription").value,
+    amount: Number(document.getElementById("financeAmount").value),
+    transaction_date: document.getElementById("financeDate").value
+  });
+
+  if (error) {
+    status.textContent = error.message;
+    return;
+  }
+
+  status.textContent = "Transaction saved successfully!";
+  this.reset();
+  loadFinanceSummary();
+});
+
+async function loadFinanceSummary() {
+  const box = document.getElementById("financeSummary");
+
+  const { data: auth } = await db.auth.getUser();
+  if (!auth.user) return;
+
+  const { data, error } = await db
+    .from("farm_finances")
+    .select("transaction_type,amount")
+    .eq("recorded_by", auth.user.id);
+
+  if (error) {
+    box.textContent = error.message;
+    return;
+  }
+
+  let income = 0;
+  let expenses = 0;
+
+  data.forEach(item => {
+    if (item.transaction_type === "Income") {
+      income += Number(item.amount);
+    } else {
+      expenses += Number(item.amount);
+    }
+  });
+
+  box.textContent =
+    "Total Income: KES " + income.toLocaleString() +
+    " | Total Expenses: KES " + expenses.toLocaleString() +
+    " | Net Balance: KES " + (income - expenses).toLocaleString();
   }</script>
 
 </body>
