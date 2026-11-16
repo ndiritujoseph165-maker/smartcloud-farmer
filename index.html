@@ -261,64 +261,35 @@ placeholder="Unit e.g. kg, acres, plants">
 </section>
 
 <section class="card hidden" id="farmerPanel">
+
 <h2>🌱 Farmer Dashboard</h2>
+
 <div class="notice">
-View farm information and reports submitted by your farm manager.
-Operational records are entered by authorised farm staff.
-</div>
-</section>
-
-<h2>Agricultural Management Modules</h2>
-
-<div class="grid">
-<div class="module">
-<h3>🌾 Crop Production</h3>
-<p>Planting, crop monitoring, inputs, harvesting and yields.</p>
+Welcome to your farm intelligence centre.
+Monitor your farm performance and receive updates from your manager.
 </div>
 
-<div class="module">
-<h3>🐄 Livestock</h3>
-<p>Animal records, health, feeding and production.</p>
+<h3>Farm Overview</h3>
+<div id="farmerOverview">
+Loading farm information...
 </div>
 
-<div class="module">
-<h3>👨‍🌾 Employees</h3>
-<p>Attendance, assignments and output per employee.</p>
+<h3>Production Records</h3>
+<div id="farmerRecords">
+Loading production records...
 </div>
 
-<div class="module">
-<h3>📊 Analytics</h3>
-<p>Production, performance and productivity reports.</p>
+<h3>Employee Productivity</h3>
+<div id="farmerProductivity">
+Loading productivity reports...
 </div>
 
-<div class="module">
-<h3>💰 Farm Finance</h3>
-<p>Income, expenditure, budgets and profitability.</p>
+<h3>Farm Reports</h3>
+<div id="farmerReports">
+Your farm reports will appear here.
 </div>
-
-<div class="module">
-<h3>☁️ Cloud Management</h3>
-<p>Centralised agricultural information and records.</p>
-</div>
-</div>
-
-<section class="card">
-<h2>Subscription & Support</h2>
-<p>SmartCloud Farmer subscription payment.</p>
-<p><strong>Payment method:</strong> Pochi la Biashara</p>
-<p><strong>Payment number:</strong> 0797181531</p>
-<p>Subscription activation requires payment verification.</p>
-<p>Customer care: ndiritujoseph165@gmail.com</p>
-</section>
-
-<button class="secondary" onclick="signOut()">Sign Out</button>
 
 </section>
-</main>
-
-<footer>
-SmartCloud Farmer © 2026 | Intelligent Agricultural Management
-</footer>
 
 <script>
 const SUPABASE_URL =
@@ -764,7 +735,41 @@ document.getElementById("assignTaskForm")
 
   status.textContent = "Task assigned successfully!";
   this.reset();
-});</script>
+});async function loadFarmerDashboard() {
+  const recordsBox = document.getElementById("farmerRecords");
+  const overviewBox = document.getElementById("farmerOverview");
+
+  recordsBox.textContent = "Loading records...";
+
+  const { data, error } = await db
+    .from("farm_records")
+    .select("title,module,details,quantity,unit,created_at")
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    recordsBox.textContent = error.message;
+    overviewBox.textContent = "Unable to load farm information.";
+    return;
+  }
+
+  overviewBox.textContent = data.length +
+    " farm records available.";
+
+  recordsBox.replaceChildren();
+
+  if (!data.length) {
+    recordsBox.textContent = "No farm records available yet.";
+    return;
+  }
+
+  data.forEach(record => {
+    const item = document.createElement("div");
+    item.className = "notice";
+    item.textContent =
+      `${record.title} | ${record.module} | ${record.details} | ${record.quantity || ""} ${record.unit || ""}`;
+    recordsBox.appendChild(item);
+  });
+  }</script>
 
 </body>
 </html>
