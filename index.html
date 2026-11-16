@@ -679,7 +679,78 @@ async function checkSession() {
 }
 
 checkSession();
-</script>
+async function markAttendance(action) {
+  const status = document.getElementById("attendanceStatus");
+
+  status.textContent = "Processing...";
+
+  const { data: auth, error: authError } =
+    await db.auth.getUser();
+
+  if (authError || !auth.user) {
+    status.textContent = "Please log in again.";
+    return;
+  }
+
+  const employeeId = auth.user.id;
+  const today = new Date().toLocaleDateString("en-CA");
+
+  const { data: record, error } = await db
+    .from("employee_attendance")
+    .select("*")
+    .eq("employee_id", employeeId)
+    .eq("attendance_date", today)
+    .maybeSingle();
+
+  if (error) {
+    status.textContent = error.message;
+    return;
+  }
+
+  const now = new Date().toISOString();
+
+  if (action === "Check-in") {
+    if (record?.check_in) {
+      status.textContent = "You have already checked in today.";
+      return;
+    }
+
+    const result = record
+      ? await db.from("employee_attendance")
+          .update({ check_in: now }).eq("id", record.id)
+      : await db.from("employee_attendance")
+          .insert({
+            employee_id: employeeId,
+            attendance_date: today,
+            check_in: now
+          });
+
+    status.textContent = result.error
+      ? result.error.message
+      : "Check-in successful!";
+  }
+
+  if (action === "Check-out") {
+    if (!record?.check_in) {
+      status.textContent = "Please check in first.";
+      return;
+    }
+
+    if (record.check_out) {
+      status.textContent = "You have already checked out today.";
+      return;
+    }
+
+    const { error: updateError } = await db
+      .from("employee_attendance")
+      .update({ check_out: now })
+      .eq("id", record.id);
+
+    status.textContent = updateError
+      ? updateError.message
+      : "Check-out successful!";
+  }
+    }</script>
 
 </body>
 </html>
