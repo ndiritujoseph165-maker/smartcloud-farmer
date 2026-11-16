@@ -444,11 +444,11 @@ async function showDashboard(user) {
   if (role === "administrator") {
     $("adminPanel").classList.remove("hidden");
     await loadUsers();
-  ;} else if (role === "manager") {
+} else if (role === "manager") {
   $("managerPanel").classList.remove("hidden");
   await loadFinanceSummary();
   await loadManagerCentre();
-  }
+  await loadFarmAnalytics();
   } else if (role === "employee") {
     $("employeePanel").classList.remove("hidden");
   } } else if (role === "farmer") {
