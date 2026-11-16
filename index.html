@@ -87,7 +87,77 @@ footer {
   padding:25px;
   color:#668071;
 }
-</style>
+/* SMARTCLOUD FARMER DASHBOARD */
+
+.dashboard {
+  padding: 24px;
+  background: #f4f8f5;
+  min-height: 100vh;
+  color: #173b29;
+  font-family: Arial, sans-serif;
+}
+
+.dashboard-header {
+  background: #087f45;
+  color: white;
+  padding: 25px;
+  border-radius: 16px;
+  margin-bottom: 24px;
+}
+
+.dashboard-header h1 {
+  margin: 0;
+  font-size: 25px;
+}
+
+.dashboard-header p {
+  margin-bottom: 0;
+  opacity: .9;
+}
+
+.module-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 15px;
+}
+
+.module-card {
+  background: white;
+  padding: 22px 15px;
+  border-radius: 14px;
+  border: 1px solid #e0eae3;
+  box-shadow: 0 3px 12px rgba(0,0,0,.04);
+}
+
+.module-card h3 {
+  color: #087f45;
+  margin: 10px 0;
+}
+
+.module-card p {
+  color: #64746a;
+  font-size: 13px;
+}
+
+.module-icon {
+  font-size: 30px;
+}
+
+.module-card button {
+  background: #087f45;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 8px;
+  width: 100%;
+  margin-top: 10px;
+}
+
+@media(max-width:400px) {
+  .module-grid {
+    grid-template-columns: 1fr;
+  }
+  }</style>
 </head>
 
 <body>
@@ -208,6 +278,61 @@ async function checkSession() {
 
 checkSession();
 </script>
+<!-- SMARTCLOUD FARMER DASHBOARD -->
 
+<div id="dashboard" class="dashboard" style="display:none;">
+
+  <div class="dashboard-header">
+    <h1>SmartCloud Farmer</h1>
+    <p>Intelligent Agriculture. Measurable Growth.</p>
+    <p>Welcome to your Farm Management Centre.</p>
+  </div>
+
+  <div class="module-grid">
+
+    <div class="module-card">
+      <div class="module-icon">🌱</div>
+      <h3>Crop Management</h3>
+      <p>Planting, inputs, harvesting and yields.</p>
+      <button onclick="alert('Crop Management')">Open Module</button>
+    </div>
+
+    <div class="module-card">
+      <div class="module-icon">🐄</div>
+      <h3>Livestock</h3>
+      <p>Animal records, health and production.</p>
+      <button onclick="alert('Livestock Management')">Open Module</button>
+    </div>
+
+    <div class="module-card">
+      <div class="module-icon">👨‍🌾</div>
+      <h3>Employees</h3>
+      <p>Attendance, assignments and productivity.</p>
+      <button onclick="alert('Employee Management')">Open Module</button>
+    </div>
+
+    <div class="module-card">
+      <div class="module-icon">📊</div>
+      <h3>Analytics</h3>
+      <p>Farm performance and production reports.</p>
+      <button onclick="alert('Farm Analytics')">Open Module</button>
+    </div>
+
+    <div class="module-card">
+      <div class="module-icon">💰</div>
+      <h3>Finance</h3>
+      <p>Budgets, expenses and farm revenue.</p>
+      <button onclick="alert('Farm Finance')">Open Module</button>
+    </div>
+
+    <div class="module-card">
+      <div class="module-icon">☁️</div>
+      <h3>Cloud</h3>
+      <p>Centralised farm data and synchronisation.</p>
+      <button onclick="alert('Cloud Services')">Open Module</button>
+    </div>
+
+  </div>
+        </div>
 </body>
   </html>
