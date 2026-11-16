@@ -181,7 +181,38 @@ placeholder="Password">
 Manage farm operations, employees and productivity.
 </div>
 
-<h3>Assign Employee Task</h3>
+<h3>💰 Farm Financial Management</h3>
+
+<form id="financeForm">
+
+<select id="financeType" required>
+<option value="">Transaction Type</option>
+<option value="Income">Income</option>
+<option value="Expense">Expense</option>
+</select>
+
+<input id="financeCategory"
+placeholder="Category e.g. Crop sales, Labour" required>
+
+<input id="financeDescription"
+placeholder="Description">
+
+<input id="financeAmount"
+type="number" min="0.01" step="0.01"
+placeholder="Amount (KES)" required>
+
+<input id="financeDate" type="date" required>
+
+<button type="submit">Save Transaction</button>
+
+</form>
+
+<div id="financeStatus" class="notice"></div>
+
+<h3>Financial Summary</h3>
+<div id="financeSummary" class="notice">
+Loading financial summary...
+</div><h3>Assign Employee Task</h3>
 
 <form id="assignTaskForm">
 
