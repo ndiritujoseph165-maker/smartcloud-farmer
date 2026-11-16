@@ -322,10 +322,53 @@ async function loadManagerRecords() {
 </script>
 
 <section class="card hidden" id="employeePanel">
-<h2>👷 Employee Workspace</h2>
+
+<h2>👷 Employee Operations Centre</h2>
+
 <div class="notice">
-Access your assigned work, attendance and productivity information.
+Manage your attendance, assigned tasks and daily productivity.
 </div>
+
+<h3>Daily Attendance</h3>
+
+<button id="checkInBtn" onclick="markAttendance('Check-in')">
+Check In
+</button>
+
+<button id="checkOutBtn" onclick="markAttendance('Check-out')">
+Check Out
+</button>
+
+<div id="attendanceStatus" class="notice"></div>
+
+<h3>My Assigned Tasks</h3>
+<div id="employeeTasks">
+Your assigned tasks will appear here.
+</div>
+
+<h3>Work Report</h3>
+
+<form id="employeeReportForm">
+
+<input id="employeeTaskTitle"
+placeholder="Task completed" required>
+
+<textarea id="employeeTaskDetails"
+placeholder="Describe the work completed" required></textarea>
+
+<input id="employeeQuantity"
+type="number" min="0" step="0.01"
+placeholder="Quantity completed">
+
+<input id="employeeUnit"
+placeholder="Unit e.g. kg, acres, plants">
+
+<button type="submit">Submit Work Report</button>
+
+</form>
+
+<div id="employeeReportStatus" class="notice"></div>
+
 </section>
 
 <section class="card hidden" id="farmerPanel">
