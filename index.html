@@ -951,7 +951,41 @@ async function loadFinanceSummary() {
 
   overview.textContent =
     "Farm modules recorded: " + Object.keys(modules).length;
-    }</script>
+    }document.getElementById("paymentForm")
+.addEventListener("submit", async function(event) {
+  event.preventDefault();
+
+  const status = document.getElementById("paymentStatus");
+  status.textContent = "Submitting payment for verification...";
+
+  const { data: auth, error: authError } =
+    await db.auth.getUser();
+
+  if (authError || !auth.user) {
+    status.textContent = "Please log in before submitting payment.";
+    return;
+  }
+
+  const { error } = await db
+    .from("subscription_payments")
+    .insert({
+      user_id: auth.user.id,
+      amount: Number(document.getElementById("paymentAmount").value),
+      payment_phone: document.getElementById("paymentPhone").value,
+      mpesa_reference: document.getElementById("mpesaReference").value.trim(),
+      status: "pending"
+    });
+
+  if (error) {
+    status.textContent = error.message;
+    return;
+  }
+
+  status.textContent =
+    "Payment submitted successfully. Awaiting administrator verification.";
+
+  this.reset();
+});</script>
 
 </body>
 </html>
