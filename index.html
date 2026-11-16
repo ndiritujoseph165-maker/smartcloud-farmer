@@ -877,7 +877,46 @@ async function loadFinanceSummary() {
     "Total Income: KES " + income.toLocaleString() +
     " | Total Expenses: KES " + expenses.toLocaleString() +
     " | Net Balance: KES " + (income - expenses).toLocaleString();
-  }</script>
+  }async function loadFarmAnalytics() {
+  const overview = document.getElementById("analyticsOverview");
+  const production = document.getElementById("productionAnalytics");
+  const employees = document.getElementById("employeeAnalytics");
+
+  overview.textContent = "Calculating performance...";
+
+  const { data: records, error: recordError } = await db
+    .from("farm_records")
+    .select("module,quantity");
+
+  if (recordError) {
+    overview.textContent = recordError.message;
+    return;
+  }
+
+  const { data: reports, error: reportError } = await db
+    .from("employee_work_reports")
+    .select("employee_id,quantity");
+
+  if (reportError) {
+    employees.textContent = reportError.message;
+    return;
+  }
+
+  const modules = {};
+
+  records.forEach(record => {
+    modules[record.module] =
+      (modules[record.module] || 0) + 1;
+  });
+
+  production.textContent = "Production records: " + records.length;
+
+  employees.textContent =
+    "Employee work reports submitted: " + reports.length;
+
+  overview.textContent =
+    "Farm modules recorded: " + Object.keys(modules).length;
+    }</script>
 
 </body>
 </html>
