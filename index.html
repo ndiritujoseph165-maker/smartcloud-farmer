@@ -201,7 +201,11 @@ placeholder="M-PESA transaction code" required>
 <h2>🛡️ Administrator Centre</h2>
 <p>Platform account oversight.</p>
 <button onclick="loadUsers()">Refresh User List</button>
-<div id="userList">User accounts will appear here.</div>
+<input
+  id="userSearch"
+  type="search"
+  placeholder="Search users by name or email..."
+><div id="userList">User accounts will appear here.</div>
 <h3>💳 Subscription Payment Approvals</h3>
 
 <div id="adminPayments">
@@ -503,7 +507,7 @@ async function showDashboard(user) {
 async function loadUsers() {
   const display = $("userList");
   display.textContent = "Loading accounts...";
-
+const search = document.getElementById("userSearch");
   const {data,error} = await db
     .from("profiles")
   .select("id,full_name,role,email,created_at")  
@@ -595,7 +599,17 @@ row.appendChild(email);["Name","Email","Joined Date","Current Role","Assign Role
     row.appendChild(action);
     table.appendChild(row);
   });
+if (search) {
+  search.oninput = () => {
+    const term = search.value.toLowerCase();
 
+    Array.from(table.querySelectorAll("tr"))
+      .slice(1)
+      .forEach(row => {
+        row.hidden = !row.textContent.toLowerCase().includes(term);
+      });
+  };
+}
   display.replaceChildren(table);
             }async function loadAdminPayments() {
   const box = document.getElementById("adminPayments");
