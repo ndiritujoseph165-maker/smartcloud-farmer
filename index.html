@@ -722,6 +722,9 @@ async function changePassword() {
   message.textContent = "Administrator password updated successfully.";
   $("newPassword").value = "";
 }
+
+async function signOut() {
+  await db.auth.signOut();
   $("dashboard").classList.add("hidden");
   $("auth").classList.remove("hidden");
   showMessage("You have signed out.");
