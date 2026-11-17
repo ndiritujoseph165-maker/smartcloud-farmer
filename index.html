@@ -452,10 +452,11 @@ async function signIn() {
 
   } catch (error) {
     showMessage(error.message || "Sign-in failed.");
-  } finally {
+    } finally {
     $("loginBtn").disabled = false;
   }
-    }
+}
+    
 
 async function showDashboard(user) {
   $("auth").classList.add("hidden");
@@ -513,10 +514,14 @@ async function showDashboard(user) {
 async function loadUsers() {
   const display = $("userList");
   display.textContent = "Loading accounts...";
-const search = document.getElementById("userSearch");
+
+  const search = document.getElementById("userSearch");
+
   const {data,error} = await db
     .from("profiles")
-  .select("id,full_name,role,email,created_at")  
+    .select("id,full_name,role")
+    .order("full_name");
+
   if (error) {
     display.textContent = error.message;
     return;
@@ -530,17 +535,13 @@ const search = document.getElementById("userSearch");
   const table = document.createElement("table");
   const heading = document.createElement("tr");
 
-  ["Name","Email","Joined Date","Current Role","Assign Role","Action"]
+  ["Name","Current Role","Assign Role","Action"]
     .forEach(label => {
       const th = document.createElement("th");
       th.textContent = label;
       heading.appendChild(th);
     });
-const email = document.createElement("td");
-email.textContent = user.email || "No email";
-row.appendChild(email);["Name","Email","Joined Date","Current Role","Assign Role","Action"]const current = document.createElement("td");
-    current.textContent = user.role;
-    row.appendChild(current);
+
   table.appendChild(heading);
 
   data.forEach(user => {
@@ -550,7 +551,9 @@ row.appendChild(email);["Name","Email","Joined Date","Current Role","Assign Role
     name.textContent = user.full_name || "Unnamed";
     row.appendChild(name);
 
-    
+    const current = document.createElement("td");
+    current.textContent = user.role;
+    row.appendChild(current);
 
     const roleCell = document.createElement("td");
     const select = document.createElement("select");
@@ -579,7 +582,6 @@ row.appendChild(email);["Name","Email","Joined Date","Current Role","Assign Role
     } else {
       button.onclick = async () => {
         button.disabled = true;
-        button.textContent = "Updating...";
 
         const {error} = await db.rpc(
           "admin_set_user_role",
@@ -592,7 +594,6 @@ row.appendChild(email);["Name","Email","Joined Date","Current Role","Assign Role
         if (error) {
           alert(error.message);
           button.disabled = false;
-          button.textContent = "Update";
           return;
         }
 
@@ -605,19 +606,21 @@ row.appendChild(email);["Name","Email","Joined Date","Current Role","Assign Role
     row.appendChild(action);
     table.appendChild(row);
   });
-if (search) {
-  search.oninput = () => {
-    const term = search.value.toLowerCase();
 
-    Array.from(table.querySelectorAll("tr"))
-      .slice(1)
-      .forEach(row => {
-        row.hidden = !row.textContent.toLowerCase().includes(term);
-      });
-  };
-}
+  if (search) {
+    search.oninput = () => {
+      const term = search.value.toLowerCase();
+
+      Array.from(table.querySelectorAll("tr"))
+        .slice(1)
+        .forEach(row => {
+          row.hidden = !row.textContent.toLowerCase().includes(term);
+        });
+    };
+  }
+
   display.replaceChildren(table);
-            }async function loadAdminPayments() {
+  }async function loadAdminPayments() {
   const box = document.getElementById("adminPayments");
   box.textContent = "Loading payment requests...";
 
