@@ -1067,15 +1067,20 @@ async function loadFinanceSummary() {
 
   this.reset();
 });(async function restoreLoginSession() {
-  const { data, error } = await db.auth.getSession();
+  try {
+    const { data, error } = await db.auth.getSession();
 
-  if (error) {
-    showMessage(error.message);
-    return;
-  }
+    if (error) {
+      showMessage(error.message);
+      return;
+    }
 
-  if (data.session && data.session.user) {
-    await showDashboard(data.session.user);
+    if (data.session && data.session.user) {
+      showMessage("Restoring your session...");
+      await showDashboard(data.session.user);
+    }
+  } catch (error) {
+    showMessage("Session error: " + error.message);
   }
 })();</script>
 
