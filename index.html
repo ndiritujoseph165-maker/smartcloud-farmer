@@ -1045,7 +1045,18 @@ async function loadFinanceSummary() {
     "Payment submitted successfully. Awaiting administrator verification.";
 
   this.reset();
-});</script>
+});(async function restoreLoginSession() {
+  const { data, error } = await db.auth.getSession();
+
+  if (error) {
+    showMessage(error.message);
+    return;
+  }
+
+  if (data.session && data.session.user) {
+    await showDashboard(data.session.user);
+  }
+})();</script>
 
 </body>
 </html>
