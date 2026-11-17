@@ -1088,7 +1088,10 @@ async function loadFinanceSummary() {
   } catch (error) {
     showMessage("Session error: " + error.message);
   }
-})();</script>
+})();window.onerror = function(message, source, line) {
+  document.getElementById("message").textContent =
+    "JavaScript error: " + message + " at line " + line;
+};</script>
 
 </body>
 </html>
