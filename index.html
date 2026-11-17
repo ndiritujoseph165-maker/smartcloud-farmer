@@ -506,9 +506,7 @@ async function loadUsers() {
 
   const {data,error} = await db
     .from("profiles")
-    .select("id,full_name,role")
-    .order("full_name");
-
+    .select("id,full_name,role,email")
   if (error) {
     display.textContent = error.message;
     return;
