@@ -1111,7 +1111,17 @@ async function loadFinanceSummary() {
     "Payment submitted successfully. Awaiting administrator verification.";
 
   this.reset();
-});(async function restoreLoginSession() {
+})db.auth.onAuthStateChange((event, session) => {
+  if (event === "PASSWORD_RECOVERY" && session) {
+    setTimeout(async () => {
+      await showDashboard(session.user);
+      $("passwordMessage").textContent =
+        "Enter your new administrator password below.";
+    }, 0);
+  }
+});
+
+;(async function restoreLoginSession() {
   try {
     const { data, error } = await db.auth.getSession();
 
@@ -1121,13 +1131,14 @@ async function loadFinanceSummary() {
     }
 
     if (data.session && data.session.user) {
-      showMessage("Restoring your session...");
       await showDashboard(data.session.user);
     }
   } catch (error) {
     showMessage("Session error: " + error.message);
   }
-})();window.onerror = function(message, source, line) {
+})();
+
+window.onerror = function(message, source, line) {
   document.getElementById("message").textContent =
     "JavaScript error: " + message + " at line " + line;
 };</script>
