@@ -506,7 +506,7 @@ async function loadUsers() {
 
   const {data,error} = await db
     .from("profiles")
-    .select("id,full_name,role,email")
+  .select("id,full_name,role,email,created_at")  
   if (error) {
     display.textContent = error.message;
     return;
@@ -520,7 +520,7 @@ async function loadUsers() {
   const table = document.createElement("table");
   const heading = document.createElement("tr");
 
-  ["Name","Email","Current Role","Assign Role","Action"]
+  ["Name","Email","Joined Date","Current Role","Assign Role","Action"]
     .forEach(label => {
       const th = document.createElement("th");
       th.textContent = label;
