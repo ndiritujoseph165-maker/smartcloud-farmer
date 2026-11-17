@@ -442,7 +442,7 @@ async function signIn() {
       showMessage(error.message);
       return;
     }
-
+showMessage("Login successful. Opening dashboard...");
     await showDashboard(data.user);
   } catch (error) {
     showMessage("Sign-in failed. Please try again.");
