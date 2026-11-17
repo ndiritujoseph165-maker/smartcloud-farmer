@@ -520,13 +520,17 @@ async function loadUsers() {
   const table = document.createElement("table");
   const heading = document.createElement("tr");
 
-  ["Name","Current Role","Assign Role","Action"]
+  ["Name","Email","Current Role","Assign Role","Action"]
     .forEach(label => {
       const th = document.createElement("th");
       th.textContent = label;
       heading.appendChild(th);
     });
-
+const email = document.createElement("td");
+email.textContent = user.email || "No email";
+row.appendChild(email);const current = document.createElement("td");
+    current.textContent = user.role;
+    row.appendChild(current);
   table.appendChild(heading);
 
   data.forEach(user => {
@@ -536,9 +540,7 @@ async function loadUsers() {
     name.textContent = user.full_name || "Unnamed";
     row.appendChild(name);
 
-    const current = document.createElement("td");
-    current.textContent = user.role;
-    row.appendChild(current);
+    
 
     const roleCell = document.createElement("td");
     const select = document.createElement("select");
