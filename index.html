@@ -451,7 +451,8 @@ async function showDashboard(user) {
   $("auth").classList.add("hidden");
   $("dashboard").classList.remove("hidden");
   $("dashboardMessage").textContent = "Loading your account...";
-$("subscriptionPanel").classList.remove("hidden");
+  $("subscriptionPanel").classList.remove("hidden");
+
   const {data:profile,error} = await db
     .from("profiles")
     .select("id,full_name,role")
@@ -478,21 +479,27 @@ $("subscriptionPanel").classList.remove("hidden");
 
   if (role === "administrator") {
     $("adminPanel").classList.remove("hidden");
-   await loadUsers();
-await loadAdminPayments(); 
-} else if (role === "manager") {
-  $("managerPanel").classList.remove("hidden");
-  await loadFinanceSummary();
-  await loadManagerCentre();
-  await loadFarmAnalytics();
+    await loadUsers();
+    await loadAdminPayments();
+
+  } else if (role === "manager") {
+    $("managerPanel").classList.remove("hidden");
+    await loadFinanceSummary();
+    await loadManagerCentre();
+    await loadFarmAnalytics();
+
   } else if (role === "employee") {
     $("employeePanel").classList.remove("hidden");
-  } } else if (role === "farmer") {
-  $("farmerPanel").classList.remove("hidden");
-  await loadFarmerDashboard();
-      }
-}
 
+  } else if (role === "farmer") {
+    $("farmerPanel").classList.remove("hidden");
+    await loadFarmerDashboard();
+
+  } else {
+    $("dashboardMessage").textContent =
+      "Your account has an unrecognised role. Contact support.";
+  }
+  }
 async function loadUsers() {
   const display = $("userList");
   display.textContent = "Loading accounts...";
