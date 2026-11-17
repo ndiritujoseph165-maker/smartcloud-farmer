@@ -431,25 +431,31 @@ async function signIn() {
   }
 
   $("loginBtn").disabled = true;
-  showMessage("Signing in...");
+  showMessage("Connecting to Supabase...");
 
   try {
-    const {data,error} = await db.auth.signInWithPassword({
-      email,password
-    });
+    const result = await Promise.race([
+      db.auth.signInWithPassword({ email, password }),
+      new Promise((_, reject) =>
+        setTimeout(() => reject(new Error("Login request timed out. Check your connection.")), 15000)
+      )
+    ]);
 
-    if (error) {
-      showMessage(error.message);
+    if (result.error) {
+      showMessage(result.error.message);
       return;
     }
-showMessage("Login successful. Opening dashboard...");
-    await showDashboard(data.user);
+
+    showMessage("Login successful. Loading dashboard...");
+
+    await showDashboard(result.data.user);
+
   } catch (error) {
-    showMessage("Sign-in failed. Please try again.");
+    showMessage(error.message || "Sign-in failed.");
   } finally {
     $("loginBtn").disabled = false;
   }
-}
+    }
 
 async function showDashboard(user) {
   $("auth").classList.add("hidden");
