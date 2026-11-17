@@ -528,7 +528,7 @@ async function loadUsers() {
     });
 const email = document.createElement("td");
 email.textContent = user.email || "No email";
-row.appendChild(email);const current = document.createElement("td");
+row.appendChild(email);["Name","Email","Joined Date","Current Role","Assign Role","Action"]const current = document.createElement("td");
     current.textContent = user.role;
     row.appendChild(current);
   table.appendChild(heading);
