@@ -1076,13 +1076,25 @@ document.getElementById("assignTaskForm")
     return;
   }
 
-  const { error } = await db.from("employee_tasks").insert({
-    employee_id: document.getElementById("taskEmployee").value,
-    assigned_by: auth.user.id,
-    task_title: document.getElementById("taskTitle").value,
-    task_details: document.getElementById("taskDetails").value,
-    due_date: document.getElementById("taskDueDate").value || null
-  });
+const { data: profile, error: profileError } = await db
+  .from("profiles")
+  .select("farm_id")
+  .eq("id", auth.user.id)
+  .single();
+
+if (profileError || !profile?.farm_id) {
+  status.textContent = "No farm assigned to your account.";
+  return;
+}
+
+const { error } = await db.from("employee_tasks").insert({
+  farm_id: profile.farm_id,
+  employee_id: document.getElementById("taskEmployee").value,
+  assigned_by: auth.user.id,
+  task_title: document.getElementById("taskTitle").value,
+  task_details: document.getElementById("taskDetails").value,
+  due_date: document.getElementById("taskDueDate").value || null
+});  
 
   if (error) {
     status.textContent = error.message;
