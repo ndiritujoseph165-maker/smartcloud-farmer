@@ -1127,14 +1127,26 @@ document.getElementById("assignTaskForm")
     return;
   }
 
-  const { error } = await db.from("farm_finances").insert({
-    recorded_by: auth.user.id,
-    transaction_type: document.getElementById("financeType").value,
-    category: document.getElementById("financeCategory").value,
-    description: document.getElementById("financeDescription").value,
-    amount: Number(document.getElementById("financeAmount").value),
-    transaction_date: document.getElementById("financeDate").value
-  });
+const { data: profile, error: profileError } = await db
+  .from("profiles")
+  .select("farm_id")
+  .eq("id", auth.user.id)
+  .single();
+
+if (profileError || !profile?.farm_id) {
+  status.textContent = "No farm assigned to your account.";
+  return;
+}
+
+const { error } = await db.from("farm_finances").insert({
+  farm_id: profile.farm_id,
+  recorded_by: auth.user.id,
+  transaction_type: document.getElementById("financeType").value,
+  category: document.getElementById("financeCategory").value,
+  description: document.getElementById("financeDescription").value,
+  amount: Number(document.getElementById("financeAmount").value),
+  transaction_date: document.getElementById("financeDate").value
+});  
 
   if (error) {
     status.textContent = error.message;
