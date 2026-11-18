@@ -1136,7 +1136,9 @@ async function loadFinanceSummary() {
     "Payment submitted successfully. Awaiting administrator verification.";
 
   this.reset();
-})db.auth.onAuthStateChange((event, session) => {
+});
+
+db.auth.onAuthStateChange((event, session) => {
   if (event === "PASSWORD_RECOVERY" && session) {
     setTimeout(async () => {
       await showDashboard(session.user);
