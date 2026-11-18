@@ -1133,7 +1133,7 @@ db.auth.onAuthStateChange((event, session) => {
   }
 });
 
-;(async function restoreLoginSession() {
+async function restoreLoginSession() {
   try {
     const { data, error } = await db.auth.getSession();
 
