@@ -401,7 +401,7 @@ const $ = id => document.getElementById(id);
 function showMessage(text) {
   $("message").textContent = text;
 }
-async function resetPassword() {
+async function resetPassword() {alert("Password recovery function is running");
   const email = $("email").value.trim();
 
   if (!email) {
