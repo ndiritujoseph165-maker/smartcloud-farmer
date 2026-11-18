@@ -409,18 +409,23 @@ async function resetPassword() {
     return;
   }
 
-  showMessage("Sending password recovery email...");
+  showMessage("Sending recovery email...");
 
-  const {error} = await db.auth.resetPasswordForEmail(email, {
-    redirectTo: window.location.origin
-  });
+  try {
+    const { error } = await db.auth.resetPasswordForEmail(email, {
+      redirectTo: window.location.origin
+    });
 
-  if (error) {
-    showMessage(error.message);
-    return;
+    if (error) {
+      showMessage("Recovery error: " + error.message);
+      return;
+    }
+
+    showMessage("Recovery email sent. Check your inbox.");
+
+  } catch (error) {
+    showMessage("Connection error: " + error.message);
   }
-
-  showMessage("Recovery email sent. Check your inbox.");
 }
 async function signUp() {
   const fullName = $("fullName").value.trim();
