@@ -968,15 +968,27 @@ async function markAttendance(action) {
     return;
   }
 
-  const { error } = await db
-    .from("employee_work_reports")
-    .insert({
-      employee_id: auth.user.id,
-      task_title: document.getElementById("employeeTaskTitle").value,
-      task_details: document.getElementById("employeeTaskDetails").value,
-      quantity: document.getElementById("employeeQuantity").value || null,
-      unit: document.getElementById("employeeUnit").value
-    });
+  const { data: profile, error: profileError } = await db
+  .from("profiles")
+  .select("farm_id")
+  .eq("id", auth.user.id)
+  .single();
+
+if (profileError || !profile?.farm_id) {
+  status.textContent = "No farm assigned to your account.";
+  return;
+}
+
+const { error } = await db
+  .from("employee_work_reports")
+  .insert({
+    farm_id: profile.farm_id,
+    employee_id: auth.user.id,
+    task_title: document.getElementById("employeeTaskTitle").value,
+    task_details: document.getElementById("employeeTaskDetails").value,
+    quantity: document.getElementById("employeeQuantity").value || null,
+    unit: document.getElementById("employeeUnit").value
+  });
 
   if (error) {
     status.textContent = error.message;
