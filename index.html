@@ -184,7 +184,7 @@ placeholder="M-PESA transaction code" required>
 
 <button id="signupBtn" onclick="signUp()">Create Account</button>
 <button id="loginBtn" onclick="signIn()">Sign In</button>
-
+<button type="button" onclick="resetPassword()">Forgot Password?</button>
 <p id="message" role="status"></p>
 </section>
 
@@ -401,7 +401,27 @@ const $ = id => document.getElementById(id);
 function showMessage(text) {
   $("message").textContent = text;
 }
+async function resetPassword() {
+  const email = $("email").value.trim();
 
+  if (!email) {
+    showMessage("Enter your email address first.");
+    return;
+  }
+
+  showMessage("Sending password recovery email...");
+
+  const {error} = await db.auth.resetPasswordForEmail(email, {
+    redirectTo: window.location.origin
+  });
+
+  if (error) {
+    showMessage(error.message);
+    return;
+  }
+
+  showMessage("Recovery email sent. Check your inbox.");
+}
 async function signUp() {
   const fullName = $("fullName").value.trim();
   const email = $("email").value.trim();
