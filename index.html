@@ -403,7 +403,7 @@ function showMessage(text) {
 }
 async function resetPassword() {alert("Password recovery function is running");
   const email = $("email").value.trim();
-
+window.resetPassword = resetPassword;
   if (!email) {
     showMessage("Enter your email address first.");
     return;
