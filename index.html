@@ -568,6 +568,93 @@ async function showDashboard(user) {
     $("dashboardMessage").textContent =
       "Your account has an unrecognised role. Contact support.";
   }
+  }// REGISTER A FARM
+$("farmForm").addEventListener("submit", async function(e) {
+  e.preventDefault();
+
+  const {data: {user}} = await db.auth.getUser();
+
+  const {error} = await db.from("farms").insert({
+    name: $("farmName").value.trim(),
+    location: $("farmLocation").value.trim(),
+    created_by: user.id
+  });
+
+  $("farmStatus").textContent = error
+    ? error.message
+    : "Farm registered successfully.";
+
+  if (!error) {
+    $("farmForm").reset();
+  }
+});
+
+// LOAD FARMS AND USERS
+async function loadFarmAssignmentOptions() {
+  const {data: farms, error} = await db
+    .from("farms")
+    .select("id,name")
+    .order("name");
+
+  if (error) {
+    $("assignmentStatus").textContent = error.message;
+    return;
+  }
+
+  $("assignFarm").innerHTML =
+    '<option value="">Select Farm</option>';
+
+  farms.forEach(farm => {
+    $("assignFarm").innerHTML +=
+      `<option value="${farm.id}">${farm.name}</option>`;
+  });
+
+  const {data: users, error: userError} = await db
+    .from("profiles")
+    .select("id,full_name,role")
+    .neq("role", "administrator");
+
+  if (userError) {
+    $("assignmentStatus").textContent = userError.message;
+    return;
+  }
+
+  $("assignUser").innerHTML =
+    '<option value="">Select User</option>';
+
+  users.forEach(user => {
+    $("assignUser").innerHTML +=
+      `<option value="${user.id}">${user.full_name} (${user.role})</option>`;
+  });
+}
+
+// LOAD OPTIONS WHEN SELECTING
+$("assignFarm").addEventListener("focus", loadFarmAssignmentOptions);
+$("assignUser").addEventListener("focus", loadFarmAssignmentOptions);
+
+// ASSIGN USER TO FARM
+async function assignUserToFarm() {
+  const userId = $("assignUser").value;
+  const farmId = $("assignFarm").value;
+
+  if (!userId || !farmId) {
+    $("assignmentStatus").textContent =
+      "Select both a user and a farm.";
+    return;
+  }
+
+  const {data: {user}} = await db.auth.getUser();
+
+  const {error} = await db.from("profiles")
+    .update({
+      farm_id: farmId,
+      assigned_by: user.id
+    })
+    .eq("id", userId);
+
+  $("assignmentStatus").textContent = error
+    ? error.message
+    : "User assigned successfully.";
   }
 async function loadUsers() {
   const display = $("userList");
