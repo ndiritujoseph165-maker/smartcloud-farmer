@@ -645,15 +645,31 @@ async function assignUserToFarm() {
 
   const {data: {user}} = await db.auth.getUser();
 
-  const {error} = await db.from("profiles")
+  const {error: memberError} = await db
+    .from("farm_members")
+    .upsert({
+      user_id: userId,
+      farm_id: farmId,
+      role: "manager"
+    }, {
+      onConflict: "farm_id,user_id"
+    });
+
+  if (memberError) {
+    $("assignmentStatus").textContent = memberError.message;
+    return;
+  }
+
+  const {error: profileError} = await db
+    .from("profiles")
     .update({
       farm_id: farmId,
       assigned_by: user.id
     })
     .eq("id", userId);
 
-  $("assignmentStatus").textContent = error
-    ? error.message
+  $("assignmentStatus").textContent = profileError
+    ? profileError.message
     : "User assigned successfully.";
   }
 async function loadUsers() {
