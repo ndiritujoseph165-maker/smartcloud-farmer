@@ -1147,8 +1147,10 @@ db.auth.onAuthStateChange((event, session) => {
     }
   } catch (error) {
     showMessage("Session error: " + error.message);
-  }
-})();
+  }}
+
+restoreLoginSession();
+
 
 window.onerror = function(message, source, line) {
   document.getElementById("message").textContent =
