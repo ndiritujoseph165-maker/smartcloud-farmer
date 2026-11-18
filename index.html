@@ -650,7 +650,11 @@ async function assignUserToFarm() {
     .upsert({
       user_id: userId,
       farm_id: farmId,
-      role: "manager"
+    role: $("assignUser").selectedOptions[0].textContent.includes("(farmer)")
+  ? "farmer"
+  : $("assignUser").selectedOptions[0].textContent.includes("(employee)")
+  ? "employee"
+  : "manager"  
     }, {
       onConflict: "farm_id,user_id"
     });
