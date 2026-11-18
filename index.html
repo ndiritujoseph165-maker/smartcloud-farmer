@@ -717,13 +717,6 @@ async function loadUsers() {
   });
   }
 
-async function signOut() {
-  const {error} = await db.auth.signOut();
-
-  if (error) {
-    $("dashboardMessage").textContent = error.message;
-    return;
-  }
 async function changePassword() {
   const password = $("newPassword").value;
   const message = $("passwordMessage");
@@ -744,30 +737,22 @@ async function changePassword() {
     return;
   }
 
-  message.textContent = "Administrator password updated successfully.";
+  message.textContent = "Password updated successfully.";
   $("newPassword").value = "";
 }
 
 async function signOut() {
-  await db.auth.signOut();
-  $("dashboard").classList.add("hidden");
-  $("auth").classList.remove("hidden");
-  showMessage("You have signed out.");
-}
-
-async function checkSession() {
-  const {data,error} = await db.auth.getSession();
+  const { error } = await db.auth.signOut();
 
   if (error) {
-    showMessage(error.message);
+    $("dashboardMessage").textContent = error.message;
     return;
   }
 
-  if (data.session) {
-    await showDashboard(data.session.user);
-  }
-}
-
+  $("dashboard").classList.add("hidden");
+  $("auth").classList.remove("hidden");
+  showMessage("You have signed out.");
+    }
 checkSession();
 async function markAttendance(action) {
   const status = document.getElementById("attendanceStatus");
