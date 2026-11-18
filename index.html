@@ -218,7 +218,29 @@ placeholder="M-PESA transaction code" required>
   placeholder="Search users by name or email..."
 ><div id="userList">User accounts will appear here.</div>
 <h3>💳 Subscription Payment Approvals</h3>
+<h3>🏡 Farm Registration</h3>
 
+<form id="farmForm">
+  <input id="farmName" placeholder="Farm name" required>
+  <input id="farmLocation" placeholder="Farm location" required>
+  <button type="submit">Register Farm</button>
+</form>
+
+<div id="farmStatus" class="notice"></div>
+
+<h3>👥 Assign Users to Farms</h3>
+
+<select id="assignUser">
+  <option value="">Select User</option>
+</select>
+
+<select id="assignFarm">
+  <option value="">Select Farm</option>
+</select>
+
+<button onclick="assignUserToFarm()">Assign User</button>
+
+<div id="assignmentStatus" class="notice"></div>
 <div id="adminPayments">
 Loading payment requests...
 </div></section>
