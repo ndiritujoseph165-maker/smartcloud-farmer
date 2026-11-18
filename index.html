@@ -1161,13 +1161,11 @@ const { error } = await db.from("farm_finances").insert({
 async function loadFinanceSummary() {
   const box = document.getElementById("financeSummary");
 
-  const { data: auth } = await db.auth.getUser();
-  if (!auth.user) return;
+  box.textContent = "Loading farm finances...";
 
   const { data, error } = await db
     .from("farm_finances")
-    .select("transaction_type,amount")
-    .eq("recorded_by", auth.user.id);
+    .select("transaction_type,amount");
 
   if (error) {
     box.textContent = error.message;
@@ -1189,6 +1187,7 @@ async function loadFinanceSummary() {
     "Total Income: KES " + income.toLocaleString() +
     " | Total Expenses: KES " + expenses.toLocaleString() +
     " | Net Balance: KES " + (income - expenses).toLocaleString();
+         }
   }async function loadFarmAnalytics() {
   const overview = document.getElementById("analyticsOverview");
   const production = document.getElementById("productionAnalytics");
