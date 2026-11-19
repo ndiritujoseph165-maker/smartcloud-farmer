@@ -519,7 +519,7 @@ async function signIn() {
 
 async function showDashboard(user) {
   $("auth").classList.add("hidden");
-  $("dashboard").classList.remove("hidden");
+  $("dashboard").classList.remove("hidden");$("adminPasswordSection").classList.add("hidden");
   $("dashboardMessage").textContent = "Loading your account...";
   
 
