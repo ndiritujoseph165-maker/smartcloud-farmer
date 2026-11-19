@@ -1289,11 +1289,13 @@ async function loadFinanceSummary() {
 
 db.auth.onAuthStateChange((event, session) => {
   if (event === "PASSWORD_RECOVERY" && session) {
-    setTimeout(async () => {
-      await showDashboard(session.user);
-      $("passwordMessage").textContent =
-        "Enter your new administrator password below.";
-    }, 0);
+    $("auth").classList.add("hidden");
+    $("dashboard").classList.remove("hidden");
+
+    $("passwordMessage").textContent =
+      "Enter your new administrator password below.";
+
+    $("newPassword").focus();
   }
 });
 
