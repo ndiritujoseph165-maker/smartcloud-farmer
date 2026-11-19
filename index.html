@@ -1315,7 +1315,9 @@ async function restoreLoginSession() {
     showMessage("Session error: " + error.message);
   }}
 
-restoreLoginSession();
+if (!window.location.hash.includes("type=recovery")) {
+  restoreLoginSession();
+}
 
 
 window.onerror = function(message, source, line) {
