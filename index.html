@@ -522,7 +522,7 @@ async function showDashboard(user) {
   $("auth").classList.add("hidden");
   $("dashboard").classList.remove("hidden");
   $("dashboardMessage").textContent = "Loading your account...";
-  $("subscriptionPanel").classList.remove("hidden");
+  
 
   const {data:profile,error} = await db
     .from("profiles")
