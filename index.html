@@ -1315,11 +1315,30 @@ async function restoreLoginSession() {
     showMessage("Session error: " + error.message);
   }}
 
-if (!window.location.hash.includes("type=recovery")) {
-  restoreLoginSession();
+async function handlePasswordRecovery() {
+  if (window.location.hash.includes("type=recovery")) {
+    const { data, error } = await db.auth.getSession();
+
+    if (error || !data.session) {
+      $("message").textContent =
+        "Recovery link invalid or expired. Request a new one.";
+      return;
+    }
+
+    $("auth").classList.add("hidden");
+    $("dashboard").classList.remove("hidden");
+    $("subscriptionPanel").classList.add("hidden");
+
+    $("passwordMessage").textContent =
+      "Enter your new administrator password below.";
+
+    $("newPassword").focus();
+  } else {
+    await restoreLoginSession();
+  }
 }
 
-
+handlePasswordRecovery();
 window.onerror = function(message, source, line) {
   document.getElementById("message").textContent =
     "JavaScript error: " + message + " at line " + line;
