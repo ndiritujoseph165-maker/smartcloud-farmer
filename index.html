@@ -189,7 +189,7 @@ placeholder="M-PESA transaction code" required>
 </section>
 
 <section id="dashboard" class="hidden">
-<div class="notice">
+<div class="notice hidden" id="adminPasswordSection">
   <h3>Change Administrator Password</h3>
   <input
     id="newPassword"
@@ -548,7 +548,7 @@ async function showDashboard(user) {
   ["adminPanel","managerPanel","employeePanel","farmerPanel"]
     .forEach(id => $(id).classList.add("hidden"));
 
-  if (role === "administrator") {
+  if (role === "administrator") {$("adminPasswordSection").classList.remove("hidden");
     $("adminPanel").classList.remove("hidden");
     await loadUsers();
     await loadAdminPayments();
