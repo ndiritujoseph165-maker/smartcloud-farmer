@@ -423,14 +423,14 @@ const $ = id => document.getElementById(id);
 function showMessage(text) {
   $("message").textContent = text;
 }
-async function resetPassword() {alert("Password recovery function is running");
+async function resetPassword() {
   const email = $("email").value.trim();
 
   if (!email) {
     showMessage("Enter your email address first.");
     return;
   }
-window.resetPassword = resetPassword;
+
   showMessage("Sending recovery email...");
 
   try {
@@ -449,6 +449,8 @@ window.resetPassword = resetPassword;
     showMessage("Connection error: " + error.message);
   }
 }
+
+window.resetPassword = resetPassword;
 async function signUp() {
   const fullName = $("fullName").value.trim();
   const email = $("email").value.trim();
