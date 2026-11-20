@@ -518,8 +518,7 @@ async function signIn() {
     
 
 async function showDashboard(user) {
-  $("auth").classList.add("hidden");
-  $("dashboard").classList.remove("hidden");$("adminPasswordSection").classList.add("hidden");
+  $("adminPasswordSection").classList.add("hidden");
   $("dashboardMessage").textContent = "Loading your account...";
   
 
@@ -589,7 +588,8 @@ await loadFarmerDashboard();
   } else {
     $("dashboardMessage").textContent =
       "Your account has an unrecognised role. Contact support.";
-  }
+  }  $("auth").classList.add("hidden");
+  $("dashboard").classList.remove("hidden");
   }// REGISTER A FARM
 $("farmForm").addEventListener("submit", async function(e) {
   e.preventDefault();
