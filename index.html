@@ -1281,7 +1281,24 @@ async function loadFinanceSummary() {
 
   const status = document.getElementById("paymentStatus");
   status.textContent = "Submitting payment for verification...";
+const amount = Number(document.getElementById("paymentAmount").value);
+const phone = document.getElementById("paymentPhone").value.trim().replace(/[\s-]/g, "");
+const reference = document.getElementById("mpesaReference").value.trim();
 
+if (amount !== 1499) {
+  status.textContent = "Invalid payment amount.";
+  return;
+}
+
+if (!/^(?:\+254|254|0)(?:7|1)\d{8}$/.test(phone)) {
+  status.textContent = "Enter a valid Kenyan M-PESA phone number.";
+  return;
+}
+
+if (!/^[A-Za-z0-9]{6,20}$/.test(reference)) {
+  status.textContent = "Enter a valid M-PESA transaction code.";
+  return;
+}
   const { data: auth, error: authError } =
     await db.auth.getUser();
 
