@@ -562,8 +562,29 @@ async function showDashboard(user) {
     $("employeePanel").classList.remove("hidden");
 
   } else if (role === "farmer") {
-    $("farmerPanel").classList.remove("hidden");
-    await loadFarmerDashboard();
+const { data: subscription, error } = await db
+.from("subscriptions")
+.select("status, expires_at")
+.eq("user_id", user.id)
+.maybeSingle();
+
+if (
+  error ||
+  !subscription ||
+  subscription.status !== "active" ||
+  !subscription.expires_at ||
+  new Date(subscription.expires_at) <= new Date()
+) {
+  $("subscriptionPanel").classList.remove("hidden");
+  $("farmerPanel").classList.add("hidden");
+  return;
+}
+
+$("subscriptionPanel").classList.add("hidden");
+$("farmerPanel").classList.remove("hidden");
+await loadFarmerDashboard();
+
+  }
 
   } else {
     $("dashboardMessage").textContent =
