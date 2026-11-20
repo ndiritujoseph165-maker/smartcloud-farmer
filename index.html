@@ -1022,7 +1022,9 @@ const { error } = await db
   }
 
   status.textContent = "Work report submitted successfully!";
-  this.reset();async function loadManagerFarmInfo() {
+  this.reset();
+});
+  async function loadManagerFarmInfo() {
   const box = document.getElementById("managerFarmInfo");
 
   const { data: auth } = await db.auth.getUser();
@@ -1053,11 +1055,12 @@ const { error } = await db
   box.textContent = farmError
     ? farmError.message
     : "Farm: " + farm.name + " | Location: " + farm.location;
-  }
-});async function loadManagerCentre() {  loadManagerFarmInfo();
+                                          }
+  async function loadManagerCentre() {
+    loadManagerFarmInfo();
   const employeeSelect = document.getElementById("taskEmployee");
 
-  const { data: employees, error } = await db
+ const { data: employees, error } = await db
     .from("profiles")
     .select("id,full_name")
     .eq("role", "employee");
