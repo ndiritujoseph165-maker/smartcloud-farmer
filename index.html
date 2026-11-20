@@ -843,7 +843,11 @@ async function loadUsers() {
 
       button.onclick = async () => {
         button.disabled = true;
-
+if (decision === "approved" &&
+    !confirm("Have you verified this payment in the actual M-PESA records?")) {
+  button.disabled = false;
+  return;
+  }
         const { error } = await db.rpc("admin_review_payment", {
           p_payment_id: payment.id,
           p_decision: decision
