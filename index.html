@@ -247,7 +247,9 @@ Loading payment requests...
 <section class="card hidden" id="managerPanel">
 
 <h2>👨‍🌾 Farm Management Centre</h2>
-
+<div id="managerFarmInfo" class="notice">
+Loading assigned farm...
+</div>
 <div class="notice">
 Manage farm operations, employees and productivity.
 </div>
@@ -1020,8 +1022,39 @@ const { error } = await db
   }
 
   status.textContent = "Work report submitted successfully!";
-  this.reset();
-});async function loadManagerCentre() {
+  this.reset();async function loadManagerFarmInfo() {
+  const box = document.getElementById("managerFarmInfo");
+
+  const { data: auth } = await db.auth.getUser();
+
+  if (!auth.user) {
+    box.textContent = "Please log in again.";
+    return;
+  }
+
+  const { data: memberships, error } = await db
+    .from("farm_members")
+    .select("farm_id, role")
+    .eq("user_id", auth.user.id);
+
+  if (error || !memberships?.length) {
+    box.textContent = "No farm assigned to your account.";
+    return;
+  }
+
+  const farmId = memberships[0].farm_id;
+
+  const { data: farm, error: farmError } = await db
+    .from("farms")
+    .select("name, location")
+    .eq("id", farmId)
+    .single();
+
+  box.textContent = farmError
+    ? farmError.message
+    : "Farm: " + farm.name + " | Location: " + farm.location;
+  }
+});async function loadManagerCentre() {  loadManagerFarmInfo();
   const employeeSelect = document.getElementById("taskEmployee");
 
   const { data: employees, error } = await db
