@@ -551,7 +551,7 @@ async function showDashboard(user) {
   if (role === "administrator") {$("adminPasswordSection").classList.remove("hidden");
     $("adminPanel").classList.remove("hidden");
     await loadUsers();
-    await loadAdminPayments();
+    await loadAdminPayments();await loadFarmAssignmentOptions();
 
   } else if (role === "manager") {
     $("managerPanel").classList.remove("hidden");
@@ -651,8 +651,6 @@ async function loadFarmAssignmentOptions() {
 }
 
 // LOAD OPTIONS WHEN SELECTING
-$("assignFarm").addEventListener("focus", loadFarmAssignmentOptions);
-$("assignUser").addEventListener("focus", loadFarmAssignmentOptions);
 
 // ASSIGN USER TO FARM
 async function assignUserToFarm() {
