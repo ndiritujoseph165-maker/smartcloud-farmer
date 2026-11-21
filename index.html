@@ -1179,7 +1179,7 @@ async function loadManagerReports() {
     commentsLabel.textContent = "Manager Comments";
 
     const comments = document.createElement("textarea");
-    comments.value = r.managers_comments || "";
+    comments.value = r.manager_comment || "";
     comments.placeholder = "Enter review comments";
 
     const save = document.createElement("button");
@@ -1216,7 +1216,7 @@ async function saveReportReview(reportId, reviewStatus, comments) {
     .from("employee_work_reports")
     .update({
       review_status: reviewStatus,
-      managers_comments: comments,
+      manager_comment: comments,
       reviewed_by: userData.user.id,
       reviewed_at: new Date().toISOString()
     })
