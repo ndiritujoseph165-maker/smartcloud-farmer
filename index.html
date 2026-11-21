@@ -558,8 +558,49 @@ async function loadEmployeeTasks(employeeId) {
     card.append(heading, details, status);
     box.appendChild(card);
   });
-  }<h3>My Work Reports & Reviews</h3>
-<div id="employeeReports">Loading reports...</div>
+  }async function loadEmployeeReports(employeeId) {
+  const box = $("employeeReports");
+
+  box.textContent = "Loading work reports...";
+
+  const { data, error } = await db
+    .from("employee_work_reports")
+    .select("task_title, task_details, review_status, manager_comment, reviewed_at")
+    .eq("employee_id", employeeId)
+    .order("submitted_at", { ascending: false });
+
+  if (error) {
+    box.textContent = "Could not load reports: " + error.message;
+    return;
+  }
+
+  box.innerHTML = "";
+
+  if (!data || data.length === 0) {
+    box.textContent = "No submitted reports yet.";
+    return;
+  }
+
+  data.forEach(report => {
+    const card = document.createElement("div");
+    card.className = "notice";
+
+    const title = document.createElement("h4");
+    title.textContent = report.task_title;
+
+    const details = document.createElement("p");
+    details.textContent = report.task_details;
+
+    const status = document.createElement("p");
+    status.textContent = "Review status: " + (report.review_status || "Pending");
+
+    const comment = document.createElement("p");
+    comment.textContent = "Manager's comments: " + (report.manager_comment || "No comments yet.");
+
+    card.append(title, details, status, comment);
+    box.appendChild(card);
+  });
+}
 async function showDashboard(user) {
   $("adminPasswordSection").classList.add("hidden");
   $("dashboardMessage").textContent = "Loading your account...";
