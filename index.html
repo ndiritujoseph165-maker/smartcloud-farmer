@@ -665,18 +665,21 @@ async function assignUserToFarm() {
 
   const {data: {user}} = await db.auth.getUser();
 
+  const selectedUser =
+    $("assignUser").selectedOptions[0].textContent;
+
+  const farmRole = selectedUser.includes("(farmer)")
+    ? "farmer"
+    : selectedUser.includes("(employee)")
+    ? "worker"
+    : "manager";
+
   const {error: memberError} = await db
     .from("farm_members")
     .upsert({
       user_id: userId,
       farm_id: farmId,
-    role: $("assignUser").selectedOptions[0].textContent.includes("(farmer)")
-  ? "farmer"
-  :role: $("assignUser").selectedOptions[0].textContent.includes("(farmer)")
-  ? "farmer"
-  : $("assignUser").selectedOptions[0].textContent.includes("(employee)")
-  ? "worker"
-  : "manager"
+      role: farmRole
     }, {
       onConflict: "farm_id,user_id"
     });
