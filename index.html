@@ -1369,8 +1369,8 @@ const { error } = await db.from("employee_tasks").insert({
       `${record.title} | ${record.module} | ${record.details} | ${record.quantity || ""} ${record.unit || ""}`;
     recordsBox.appendChild(item);
   })async function loadFarmerDashboard() {
-  const recordsBox = document.getElementById("farmerRecords");
-  const overviewBox = document.getElementById("farmerOverview");
+const recordsBox = document.getElementById("farmerRecords");
+const overviewBox = document.getElementById("farmerOverview");
 
   recordsBox.textContent = "Loading records...";
 
@@ -1453,7 +1453,10 @@ async function loadFarmerProductivity() {
 }document.getElementById("financeForm")
 .addEventListener("submit", async function(event) {
   event.preventDefault();
-category: document.getElementById(\"financeCategory\").value,
+event.preventDefault();
+
+const status = document.getElementById("financeStatus");
+status.textContent = "Saving transaction...";
   const status = document.getElementById("financeStatus");
   status.textContent = "Saving transaction...";
 
