@@ -373,7 +373,8 @@ placeholder="Unit e.g. kg, acres, plants">
 </form>
 
 <div id="employeeReportStatus" class="notice"></div>
-
+<h3>My Work Reports & Reviews</h3>
+<div id="employeeReports">Loading reports...</div>
 </section>
 
 <section class="card hidden" id="farmerPanel">
@@ -557,7 +558,8 @@ async function loadEmployeeTasks(employeeId) {
     card.append(heading, details, status);
     box.appendChild(card);
   });
-  }
+  }<h3>My Work Reports & Reviews</h3>
+<div id="employeeReports">Loading reports...</div>
 async function showDashboard(user) {
   $("adminPasswordSection").classList.add("hidden");
   $("dashboardMessage").textContent = "Loading your account...";
@@ -599,7 +601,7 @@ async function showDashboard(user) {
     await loadFarmAnalytics();
 
   } else if (role === "employee") {
-    $("employeePanel").classList.remove("hidden");await loadEmployeeTasks(user.id);
+    $("employeePanel").classList.remove("hidden");await loadEmployeeTasks(user.id);await loadEmployeeReports(user.id);
 
   } else if (role === "farmer") {
 const { data: subscription, error } = await db
