@@ -672,9 +672,11 @@ async function assignUserToFarm() {
       farm_id: farmId,
     role: $("assignUser").selectedOptions[0].textContent.includes("(farmer)")
   ? "farmer"
+  :role: $("assignUser").selectedOptions[0].textContent.includes("(farmer)")
+  ? "farmer"
   : $("assignUser").selectedOptions[0].textContent.includes("(employee)")
-  ? "employee"
-  : "manager"  
+  ? "worker"
+  : "manager"
     }, {
       onConflict: "farm_id,user_id"
     });
