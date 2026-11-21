@@ -407,7 +407,7 @@ Your farm reports will appear here.
 </div>
 
 </section>
-
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 const SUPABASE_URL =
 "https://eeobgnmhljgxjmnghhak.supabase.co";
@@ -1420,13 +1420,12 @@ async function loadFarmerProductivity() {
       `${report.task_title} | ${report.quantity || ""} ${report.unit || ""} | ${report.review_status || "Pending"}`;
     box.appendChild(item);
   });
-}document.getElementById("financeForm")
+}
+
+document.getElementById("financeForm")
 .addEventListener("submit", async function(event) {
   event.preventDefault();
-event.preventDefault();
 
-const status = document.getElementById("financeStatus");
-status.textContent = "Saving transaction...";
   const status = document.getElementById("financeStatus");
   status.textContent = "Saving transaction...";
 
