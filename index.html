@@ -599,7 +599,7 @@ async function showDashboard(user) {
     await loadFarmAnalytics();
 
   } else if (role === "employee") {
-    $("employeePanel").classList.remove("hidden");
+    $("employeePanel").classList.remove("hidden");await loadEmployeeTasks(user.id);
 
   } else if (role === "farmer") {
 const { data: subscription, error } = await db
