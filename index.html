@@ -666,7 +666,7 @@ if (
 $("subscriptionPanel").classList.add("hidden");
 $("farmerPanel").classList.remove("hidden");
 await loadFarmerDashboard();
-
+await loadFarmerProductivity();
   } else {
     $("dashboardMessage").textContent =
       "Your account has an unrecognised role. Contact support.";
@@ -1368,7 +1368,55 @@ const { error } = await db.from("employee_tasks").insert({
     item.textContent =
       `${record.title} | ${record.module} | ${record.details} | ${record.quantity || ""} ${record.unit || ""}`;
     recordsBox.appendChild(item);
+  });async function loadFarmerProductivity() {
+  const box = document.getElementById("farmerProductivity");
+
+  box.textContent = "Loading productivity reports...";
+
+  const { data: auth } = await db.auth.getUser();
+
+  if (!auth.user) {
+    box.textContent = "Please log in again.";
+    return;
+  }
+
+  const { data: profile, error: profileError } = await db
+    .from("profiles")
+    .select("farm_id")
+    .eq("id", auth.user.id)
+    .single();
+
+  if (profileError || !profile?.farm_id) {
+    box.textContent = "No farm assigned to your account.";
+    return;
+  }
+
+  const { data, error } = await db
+    .from("employee_work_reports")
+    .select("task_title, quantity, unit, submitted_at, review_status")
+    .eq("farm_id", profile.farm_id)
+    .order("submitted_at", { ascending: false });
+
+  if (error) {
+    box.textContent = error.message;
+    return;
+  }
+
+  if (!data.length) {
+    box.textContent = "No employee productivity reports available yet.";
+    return;
+  }
+
+  box.replaceChildren();
+
+  data.forEach(report => {
+    const item = document.createElement("div");
+    item.className = "notice";
+    item.textContent =
+      `${report.task_title} | ${report.quantity || ""} ${report.unit || ""} | ${report.review_status || "Pending"}`;
+    box.appendChild(item);
   });
+  }
   }document.getElementById("financeForm")
 .addEventListener("submit", async function(event) {
   event.preventDefault();
