@@ -1368,7 +1368,41 @@ const { error } = await db.from("employee_tasks").insert({
     item.textContent =
       `${record.title} | ${record.module} | ${record.details} | ${record.quantity || ""} ${record.unit || ""}`;
     recordsBox.appendChild(item);
-  });async function loadFarmerProductivity() {
+  })async function loadFarmerDashboard() {
+  const recordsBox = document.getElementById("farmerRecords");
+  const overviewBox = document.getElementById("farmerOverview");
+
+  recordsBox.textContent = "Loading records...";
+
+  const { data, error } = await db
+    .from("farm_records")
+    .select("title,module,details,quantity,unit,created_at")
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    recordsBox.textContent = error.message;
+    overviewBox.textContent = "Unable to load farm information.";
+    return;
+  }
+
+  overviewBox.textContent = data.length + " farm records available.";
+  recordsBox.replaceChildren();
+
+  if (!data.length) {
+    recordsBox.textContent = "No farm records available yet.";
+    return;
+  }
+
+  data.forEach(record => {
+    const item = document.createElement("div");
+    item.className = "notice";
+    item.textContent =
+      `${record.title} | ${record.module} | ${record.details} | ${record.quantity || ""} ${record.unit || ""}`;
+    recordsBox.appendChild(item);
+  });
+}
+
+async function loadFarmerProductivity() {
   const box = document.getElementById("farmerProductivity");
 
   box.textContent = "Loading productivity reports...";
@@ -1416,11 +1450,10 @@ const { error } = await db.from("employee_tasks").insert({
       `${report.task_title} | ${report.quantity || ""} ${report.unit || ""} | ${report.review_status || "Pending"}`;
     box.appendChild(item);
   });
-  }
-  }document.getElementById("financeForm")
+}document.getElementById("financeForm")
 .addEventListener("submit", async function(event) {
   event.preventDefault();
-
+category: document.getElementById(\"financeCategory\").value,
   const status = document.getElementById("financeStatus");
   status.textContent = "Saving transaction...";
 
