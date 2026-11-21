@@ -518,7 +518,46 @@ async function signIn() {
   }
 }
     
+async function loadEmployeeTasks(employeeId) {
+  const box = $("employeeTasks");
 
+  box.textContent = "Loading assigned tasks...";
+
+  const { data: tasks, error } = await db
+    .from("employee_tasks")
+    .select("id, task_title, task_details, due_date, status")
+    .eq("employee_id", employeeId)
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    box.textContent = "Could not load tasks: " + error.message;
+    return;
+  }
+
+  if (!tasks || tasks.length === 0) {
+    box.textContent = "No assigned tasks yet.";
+    return;
+  }
+
+  box.innerHTML = "";
+
+  tasks.forEach(task => {
+    const card = document.createElement("div");
+    card.className = "notice";
+
+    const heading = document.createElement("h4");
+    heading.textContent = task.task_title;
+
+    const details = document.createElement("p");
+    details.textContent = task.task_details;
+
+    const status = document.createElement("p");
+    status.textContent = "Status: " + task.status;
+
+    card.append(heading, details, status);
+    box.appendChild(card);
+  });
+  }
 async function showDashboard(user) {
   $("adminPasswordSection").classList.add("hidden");
   $("dashboardMessage").textContent = "Loading your account...";
