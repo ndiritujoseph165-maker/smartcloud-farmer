@@ -1127,6 +1127,8 @@ const { error } = await db
 async function loadManagerReports() {
   const box = document.getElementById("managerReports");
 
+  box.textContent = "Loading reports...";
+
   const { data, error } = await db
     .from("employee_work_reports")
     .select("*")
@@ -1137,12 +1139,97 @@ async function loadManagerReports() {
     return;
   }
 
-  box.textContent = data.length
-    ? data.map(r =>
-        `${r.task_title} — ${r.task_details} — ${r.quantity || ""} ${r.unit || ""}`
-      ).join("\n")
-    : "No work reports submitted yet.";
+  box.innerHTML = "";
+
+  if (!data || data.length === 0) {
+    box.textContent = "No work reports submitted yet.";
+    return;
+  }
+
+  data.forEach(r => {
+    const card = document.createElement("div");
+    card.className = "notice";
+
+    const title = document.createElement("h4");
+    title.textContent = r.task_title;
+
+    const details = document.createElement("p");
+    details.textContent = r.task_details;
+
+    const quantity = document.createElement("p");
+    quantity.textContent =
+      "Quantity: " + (r.quantity || 0) + " " + (r.unit || "");
+
+    const statusLabel = document.createElement("label");
+    statusLabel.textContent = "Review Status";
+
+    const status = document.createElement("select");
+
+    ["pending", "approved", "rejected"].forEach(value => {
+      const option = document.createElement("option");
+      option.value = value;
+      option.textContent =
+        value.charAt(0).toUpperCase() + value.slice(1);
+      status.appendChild(option);
+    });
+
+    status.value = r.review_status || "pending";
+
+    const commentsLabel = document.createElement("p");
+    commentsLabel.textContent = "Manager Comments";
+
+    const comments = document.createElement("textarea");
+    comments.value = r.managers_comments || "";
+    comments.placeholder = "Enter review comments";
+
+    const save = document.createElement("button");
+    save.textContent = "Save Review";
+
+    save.onclick = () =>
+      saveReportReview(r.id, status.value, comments.value);
+
+    card.append(
+      title,
+      details,
+      quantity,
+      statusLabel,
+      status,
+      commentsLabel,
+      comments,
+      save
+    );
+
+    box.appendChild(card);
+  });
 }
+
+async function saveReportReview(reportId, reviewStatus, comments) {
+  const { data: userData, error: userError } =
+    await db.auth.getUser();
+
+  if (userError || !userData.user) {
+    alert("Unable to identify manager.");
+    return;
+  }
+
+  const { error } = await db
+    .from("employee_work_reports")
+    .update({
+      review_status: reviewStatus,
+      managers_comments: comments,
+      reviewed_by: userData.user.id,
+      reviewed_at: new Date().toISOString()
+    })
+    .eq("id", reportId);
+
+  if (error) {
+    alert("Review failed: " + error.message);
+    return;
+  }
+
+  alert("Report review saved successfully!");
+  await loadManagerReports();
+  }
 
 async function loadManagerAttendance() {
   const box = document.getElementById("managerAttendance");
