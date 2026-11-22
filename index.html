@@ -435,9 +435,18 @@ Loading production records...
 Loading productivity reports...
 </div>
 
-<h3>Farm Reports</h3>
-<div id="farmerReports">
-Your farm reports will appear here.
+<h3>📑 Farm Performance Reports</h3>
+
+<div class="notice">
+Generate a report covering production, employee productivity and farm finances.
+</div>
+
+<button type="button" onclick="generateFarmerFarmReport()">
+Generate Farm Report
+</button>
+
+<div id="farmerReports" class="notice">
+Your farm report will appear here.
 </div>
 <h3>💰 Farm Financial Summary</h3>
 <div id="farmerFinanceSummary" class="notice">
@@ -1797,7 +1806,87 @@ document.getElementById("productionForm")
     "Total Income: KES " + income.toLocaleString() +
     " | Total Expenses: KES " + expenses.toLocaleString() +
     " | Net Balance: KES " + (income - expenses).toLocaleString();
+      }async function generateFarmerFarmReport() {
+  const box = document.getElementById("farmerReports");
+  box.textContent = "Generating farm performance report...";
+
+  try {
+    const { data: auth, error: authError } = await db.auth.getUser();
+
+    if (authError || !auth.user) {
+      throw new Error("Please sign in again.");
+    }
+
+    const { data: profile, error: profileError } = await db
+      .from("profiles")
+      .select("farm_id, role")
+      .eq("id", auth.user.id)
+      .single();
+
+    if (profileError || !profile || profile.role !== "farmer" || !profile.farm_id) {
+      throw new Error("Unable to verify your farm assignment.");
+    }
+
+    const farmId = profile.farm_id;
+
+    const [recordsResult, reportsResult, financeResult] = await Promise.all([
+      db.from("farm_records")
+        .select("module, quantity, unit")
+        .eq("farm_id", farmId),
+
+      db.from("employee_work_reports")
+        .select("quantity, unit, review_status")
+        .eq("farm_id", farmId),
+
+      db.from("farm_finances")
+        .select("transaction_type, amount")
+        .eq("farm_id", farmId)
+    ]);
+
+    if (recordsResult.error) throw recordsResult.error;
+    if (reportsResult.error) throw reportsResult.error;
+    if (financeResult.error) throw financeResult.error;
+
+    const records = recordsResult.data || [];
+    const reports = reportsResult.data || [];
+    const finances = financeResult.data || [];
+
+    let income = 0;
+    let expenses = 0;
+
+    finances.forEach(item => {
+      if (item.transaction_type === "Income") {
+        income += Number(item.amount);
+      } else if (item.transaction_type === "Expense") {
+        expenses += Number(item.amount);
       }
+    });
+
+    box.replaceChildren();
+
+    const heading = document.createElement("h4");
+    heading.textContent = "Farm Performance Report";
+    box.appendChild(heading);
+
+    const lines = [
+      "Production records: " + records.length,
+      "Employee work reports: " + reports.length,
+      "Total farm income: KES " + income.toLocaleString(),
+      "Total farm expenses: KES " + expenses.toLocaleString(),
+      "Net financial balance: KES " + (income - expenses).toLocaleString(),
+      "Report generated: " + new Date().toLocaleString()
+    ];
+
+    lines.forEach(line => {
+      const p = document.createElement("p");
+      p.textContent = line;
+      box.appendChild(p);
+    });
+
+  } catch (error) {
+    box.textContent = "Report error: " + error.message;
+  }
+  }
 async function restoreLoginSession() {
   try {
     const { data, error } = await db.auth.getSession();
