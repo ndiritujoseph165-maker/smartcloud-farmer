@@ -347,7 +347,10 @@ placeholder="Unit e.g. kg, litres, crates" required>
 </form>
 
 <div id="productionStatus" class="notice"></div>
-
+<h4>Saved Production Records</h4>
+<div id="managerProductionRecords">
+Loading production records...
+  </div>
 <hr>
 <h3>Employee Work Reports</h3>
 <div id="managerReports">Loading reports...</div>
@@ -671,7 +674,7 @@ async function showDashboard(user) {
     await loadFinanceSummary();
     await loadManagerCentre();
     await loadFarmAnalytics();
-
+await loadManagerProductionRecords();
   } else if (role === "employee") {
     $("employeePanel").classList.remove("hidden");await loadEmployeeTasks(user.id);await loadEmployeeReports(user.id);
 
@@ -1680,7 +1683,71 @@ document.getElementById("productionForm")
   } catch (error) {
     status.textContent = "Error: " + error.message;
   }
-});
+});async function loadManagerProductionRecords() {
+  const box = document.getElementById("managerProductionRecords");
+
+  box.textContent = "Loading production records...";
+
+  const { data: auth } = await db.auth.getUser();
+
+  if (!auth.user) {
+    box.textContent = "Please sign in again.";
+    return;
+  }
+
+  const { data: profile, error: profileError } = await db
+    .from("profiles")
+    .select("farm_id, role")
+    .eq("id", auth.user.id)
+    .single();
+
+  if (profileError || !profile || !profile.farm_id) {
+    box.textContent = "Unable to load assigned farm.";
+    return;
+  }
+
+  if (profile.role !== "manager") {
+    box.textContent = "Manager access required.";
+    return;
+  }
+
+  const { data, error } = await db
+    .from("farm_records")
+    .select("module, title, details, quantity, unit, created_at")
+    .eq("farm_id", profile.farm_id)
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    box.textContent = error.message;
+    return;
+  }
+
+  if (!data.length) {
+    box.textContent = "No production records available yet.";
+    return;
+  }
+
+  box.replaceChildren();
+
+  data.forEach(record => {
+    const card = document.createElement("div");
+    card.className = "notice";
+
+    const title = document.createElement("strong");
+    title.textContent = record.title;
+
+    const details = document.createElement("p");
+    details.textContent =
+      record.module + " | " +
+      record.quantity + " " + record.unit;
+
+    const description = document.createElement("p");
+    description.textContent = record.details || "";
+
+    card.append(title, details, description);
+    box.appendChild(card);
+  });
+}
 async function restoreLoginSession() {
   try {
     const { data, error } = await db.auth.getSession();
