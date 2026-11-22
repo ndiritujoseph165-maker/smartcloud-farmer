@@ -704,9 +704,13 @@ if (
   !subscription.expires_at ||
   new Date(subscription.expires_at) <= new Date()
 ) {
-  $("subscriptionPanel").classList.remove("hidden");
-  $("farmerPanel").classList.add("hidden");
-  return;
+$("subscriptionPanel").classList.remove("hidden");
+$("farmerPanel").classList.add("hidden");
+
+$("auth").classList.add("hidden");
+$("dashboard").classList.remove("hidden");
+
+return;  
 }
 
 $("subscriptionPanel").classList.add("hidden");
