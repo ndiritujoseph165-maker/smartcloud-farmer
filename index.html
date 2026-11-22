@@ -439,7 +439,10 @@ Loading productivity reports...
 <div id="farmerReports">
 Your farm reports will appear here.
 </div>
-
+<h3>💰 Farm Financial Summary</h3>
+<div id="farmerFinanceSummary" class="notice">
+Loading farm finances...
+</div>
 </section>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
@@ -701,7 +704,7 @@ $("subscriptionPanel").classList.add("hidden");
 $("farmerPanel").classList.remove("hidden");
 await loadFarmerDashboard();
 await loadFarmerProductivity();
-  } else {
+ await loadFarmerFinanceSummary(); } else {
     $("dashboardMessage").textContent =
       "Your account has an unrecognised role. Contact support.";
   }  $("auth").classList.add("hidden");
@@ -1747,7 +1750,54 @@ document.getElementById("productionForm")
     card.append(title, details, description);
     box.appendChild(card);
   });
-}
+}async function loadFarmerFinanceSummary() {
+  const box = document.getElementById("farmerFinanceSummary");
+  box.textContent = "Loading farm finances...";
+
+  const { data: auth } = await db.auth.getUser();
+
+  if (!auth.user) {
+    box.textContent = "Please sign in again.";
+    return;
+  }
+
+  const { data: profile, error: profileError } = await db
+    .from("profiles")
+    .select("farm_id, role")
+    .eq("id", auth.user.id)
+    .single();
+
+  if (profileError || !profile || profile.role !== "farmer" || !profile.farm_id) {
+    box.textContent = "Unable to load assigned farm.";
+    return;
+  }
+
+  const { data, error } = await db
+    .from("farm_finances")
+    .select("transaction_type, amount")
+    .eq("farm_id", profile.farm_id);
+
+  if (error) {
+    box.textContent = "Finance report: " + error.message;
+    return;
+  }
+
+  let income = 0;
+  let expenses = 0;
+
+  data.forEach(item => {
+    if (item.transaction_type === "Income") {
+      income += Number(item.amount);
+    } else if (item.transaction_type === "Expense") {
+      expenses += Number(item.amount);
+    }
+  });
+
+  box.textContent =
+    "Total Income: KES " + income.toLocaleString() +
+    " | Total Expenses: KES " + expenses.toLocaleString() +
+    " | Net Balance: KES " + (income - expenses).toLocaleString();
+      }
 async function restoreLoginSession() {
   try {
     const { data, error } = await db.auth.getSession();
