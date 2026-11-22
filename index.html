@@ -683,9 +683,9 @@ async function showDashboard(user) {
 
   } else if (role === "manager") {
     $("managerPanel").classList.remove("hidden");
-    await loadFinanceSummary();
-    await loadManagerCentre();
-    await loadFarmAnalytics();
+    loadFarmerDashboard();
+loadFarmerProductivity();
+loadFarmerFinanceSummary();
 await loadManagerProductionRecords();
   } else if (role === "employee") {
     $("employeePanel").classList.remove("hidden");await loadEmployeeTasks(user.id);await loadEmployeeReports(user.id);
