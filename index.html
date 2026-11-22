@@ -317,7 +317,38 @@ placeholder="Task instructions"></textarea>
 </form>
 
 <div id="taskAssignStatus" class="notice"></div>
+<h3>🌾 Production Records</h3>
 
+<form id="productionForm">
+
+<select id="productionModule" required>
+<option value="">Select Production Module</option>
+<option value="Crops">Crop Production</option>
+<option value="Livestock">Livestock</option>
+<option value="Herbs">Herb Production</option>
+<option value="Other">Other</option>
+</select>
+
+<input id="productionTitle"
+placeholder="Production title" required>
+
+<textarea id="productionDetails"
+placeholder="Production details"></textarea>
+
+<input id="productionQuantity"
+type="number" min="0.01" step="0.01"
+placeholder="Quantity" required>
+
+<input id="productionUnit"
+placeholder="Unit e.g. kg, litres, crates" required>
+
+<button type="submit">Save Production Record</button>
+
+</form>
+
+<div id="productionStatus" class="notice"></div>
+
+<hr>
 <h3>Employee Work Reports</h3>
 <div id="managerReports">Loading reports...</div>
 
@@ -1600,7 +1631,56 @@ db.auth.onAuthStateChange((event, session) => {
     $("newPassword").focus();
   }
 });
+document.getElementById("productionForm")
+.addEventListener("submit", async function(event) {
+  event.preventDefault();
 
+  const status = document.getElementById("productionStatus");
+  status.textContent = "Saving production record...";
+
+  try {
+    const { data: auth, error: authError } =
+      await db.auth.getUser();
+
+    if (authError || !auth.user) {
+      throw new Error("Please sign in again.");
+    }
+
+    const { data: profile, error: profileError } = await db
+      .from("profiles")
+      .select("farm_id, role")
+      .eq("id", auth.user.id)
+      .single();
+
+    if (profileError || !profile) {
+      throw new Error("Could not load your farm profile.");
+    }
+
+    if (profile.role !== "manager" || !profile.farm_id) {
+      throw new Error("Manager farm assignment not found.");
+    }
+
+    const { error } = await db
+      .from("farm_records")
+      .insert({
+        module: document.getElementById("productionModule").value,
+        title: document.getElementById("productionTitle").value,
+        details: document.getElementById("productionDetails").value,
+        quantity: Number(document.getElementById("productionQuantity").value),
+        unit: document.getElementById("productionUnit").value,
+        created_by: auth.user.id,
+        farm_id: profile.farm_id
+      });
+
+    if (error) throw error;
+
+    status.textContent = "Production record saved successfully!";
+    this.reset();
+
+  } catch (error) {
+    status.textContent = "Error: " + error.message;
+  }
+});
 async function restoreLoginSession() {
   try {
     const { data, error } = await db.auth.getSession();
