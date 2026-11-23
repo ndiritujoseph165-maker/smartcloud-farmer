@@ -703,7 +703,18 @@ if (
   subscription.status !== "active" ||
   !subscription.expires_at ||
   new Date(subscription.expires_at) <= new Date()
-) {
+) {if (window.subscriptionExpiryChecker) {
+  clearInterval(window.subscriptionExpiryChecker);
+}
+
+window.subscriptionExpiryChecker = setInterval(() => {
+  if (new Date(subscription.expires_at) <= new Date()) {
+    clearInterval(window.subscriptionExpiryChecker);
+
+    $("farmerPanel").classList.add("hidden");
+    $("subscriptionPanel").classList.remove("hidden");
+  }
+}, 30000);
 $("subscriptionPanel").classList.remove("hidden");
 $("farmerPanel").classList.add("hidden");
 
