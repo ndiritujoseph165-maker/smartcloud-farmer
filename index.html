@@ -767,7 +767,7 @@ $("subscriptionPanel").classList.add("hidden");
 $("farmerPanel").classList.remove("hidden");
 await loadFarmerDashboard();
 await loadFarmerProductivity();
- await loadFarmerFinanceSummary(); } else {
+ await loadFarmerFinanceSummary();await loadFarmerEmployees(); } else {
     $("dashboardMessage").textContent =
       "Your account has an unrecognised role. Contact support.";
   }  $("auth").classList.add("hidden");
@@ -1940,7 +1940,86 @@ document.getElementById("productionForm")
   } catch (error) {
     box.textContent = "Report error: " + error.message;
   }
+  }async function loadFarmerEmployees() {
+  const status = $("farmerEmployeeStatus");
+  const list = $("farmerEmployeeList");
+
+  status.textContent = "Loading employees...";
+  list.innerHTML = "";
+
+  try {
+    const { data, error } = await db.functions.invoke("hyper-task", {
+      body: { action: "list" }
+    });
+
+    if (error) throw error;
+
+    const employees = data.employees || [];
+
+    if (employees.length === 0) {
+      status.textContent = "No employees assigned yet.";
+      return;
+    }
+
+    status.textContent = employees.length + " employee(s) found.";
+
+    employees.forEach(employee => {
+      const item = document.createElement("div");
+      item.className = "card";
+      item.textContent = employee.full_name || "Unnamed employee";
+      list.appendChild(item);
+    });
+
+  } catch (error) {
+    status.textContent = "Error loading employees: " + error.message;
   }
+}
+
+$("farmerCreateEmployeeForm").addEventListener("submit", async function(event) {
+  event.preventDefault();
+
+  const name = $("newEmployeeName").value.trim();
+  const email = $("newEmployeeEmail").value.trim();
+  const password = $("newEmployeePassword").value;
+
+  const { data, error } = await db.functions.invoke("hyper-task", {
+    body: {
+      action: "create",
+      name,
+      email,
+      password
+    }
+  });
+
+  if (error) {
+    $("farmerEmployeeStatus").textContent = error.message;
+    return;
+  }
+
+  $("farmerEmployeeStatus").textContent = data.message;
+  this.reset();
+  await loadFarmerEmployees();
+});
+
+$("addExistingEmployeeBtn").addEventListener("click", async function() {
+  const email = $("existingEmployeeEmail").value.trim();
+
+  const { data, error } = await db.functions.invoke("hyper-task", {
+    body: {
+      action: "add_existing",
+      email
+    }
+  });
+
+  if (error) {
+    $("farmerEmployeeStatus").textContent = error.message;
+    return;
+  }
+
+  $("farmerEmployeeStatus").textContent = data.message;
+  $("existingEmployeeEmail").value = "";
+  await loadFarmerEmployees();
+});
 async function restoreLoginSession() {
   try {
     const { data, error } = await db.auth.getSession();
