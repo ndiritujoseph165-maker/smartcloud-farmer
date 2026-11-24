@@ -467,7 +467,10 @@ type="email" placeholder="Employee email" required>
 type="password"
 placeholder="Temporary password (minimum 6 characters)"
 minlength="6" required>
-
+<select id="newEmployeeRole" required>
+  <option value="employee">Employee</option>
+  <option value="manager">Farm Manager</option>
+</select>
 <button type="submit">Create Employee</button>
 </form>
 </div>
@@ -2063,7 +2066,100 @@ handlePasswordRecovery();
 window.onerror = function(message, source, line) {
   document.getElementById("message").textContent =
     "JavaScript error: " + message + " at line " + line;
-};</script>
 
+};// CREATE EMPLOYEE OR FARM MANAGER
+document.getElementById("farmerCreateEmployeeForm")
+.addEventListener("submit", async function(e) {
+    e.preventDefault();
+
+    const name = document.getElementById("newEmployeeName").value.trim();
+    const email = document.getElementById("newEmployeeEmail").value.trim();
+    const password = document.getElementById("newEmployeePassword").value;
+    const role = document.getElementById("newEmployeeRole").value;
+
+    const button = this.querySelector('button[type="submit"]');
+    button.disabled = true;
+    button.textContent = "Creating...";
+
+    try {
+        const { data, error } = await db.functions.invoke(
+            "manage-farm-employees",
+            {
+                body: {
+                    action: "create",
+                    name,
+                    email,
+                    password,
+                    role
+                }
+            }
+        );
+
+        if (error) throw error;
+        if (data.error) throw new Error(data.error);
+
+        alert(data.message);
+        this.reset();
+        await loadFarmerEmployees();
+
+    } catch (error) {
+        alert("Error: " + error.message);
+    } finally {
+        button.disabled = false;
+        button.textContent = "Create Employee";
+    }
+});
+
+
+// LOAD FARM EMPLOYEES AND MANAGERS
+async function loadFarmerEmployees() {
+    const status = document.getElementById("farmerEmployeeStatus");
+    const list = document.getElementById("farmerEmployeeList");
+
+    status.textContent = "Loading employees...";
+
+    try {
+        const { data, error } = await db.functions.invoke(
+            "manage-farm-employees",
+            {
+                body: { action: "list" }
+            }
+        );
+
+        if (error) throw error;
+        if (data.error) throw new Error(data.error);
+
+        const employees = data.employees || [];
+
+        list.innerHTML = "";
+
+        if (employees.length === 0) {
+            status.textContent = "No employees or managers added yet.";
+            return;
+        }
+
+        employees.forEach(employee => {
+            const item = document.createElement("div");
+            item.className = "card";
+
+            const name = document.createElement("strong");
+            name.textContent = employee.full_name || "Unnamed user";
+
+            const role = document.createElement("p");
+            role.textContent =
+                employee.farm_role === "manager"
+                    ? "Farm Manager"
+                    : "Employee";
+
+            item.append(name, role);
+            list.appendChild(item);
+        });
+
+        status.textContent = employees.length + " farm members found.";
+
+    } catch (error) {
+        status.textContent = "Could not load employees: " + error.message;
+    }
+}</script>
 </body>
 </html>
