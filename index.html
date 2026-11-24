@@ -451,6 +451,45 @@ Your farm report will appear here.
 <h3>💰 Farm Financial Summary</h3>
 <div id="farmerFinanceSummary" class="notice">
 Loading farm finances...
+</div><h3>👥 Employee Management</h3>
+
+<div class="card">
+<h4>Create New Employee</h4>
+
+<form id="farmerCreateEmployeeForm">
+<input id="newEmployeeName"
+placeholder="Employee full name" required>
+
+<input id="newEmployeeEmail"
+type="email" placeholder="Employee email" required>
+
+<input id="newEmployeePassword"
+type="password"
+placeholder="Temporary password (minimum 6 characters)"
+minlength="6" required>
+
+<button type="submit">Create Employee</button>
+</form>
+</div>
+
+<div class="card">
+<h4>Add Existing Employee</h4>
+
+<input id="existingEmployeeEmail"
+type="email"
+placeholder="Registered employee email">
+
+<button type="button" id="addExistingEmployeeBtn">
+Add Existing Employee
+</button>
+</div>
+
+<h4>My Farm Employees</h4>
+<div id="farmerEmployeeStatus" class="notice">
+Loading employees...
+</div>
+
+<div id="farmerEmployeeList">
 </div>
 </section>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
