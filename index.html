@@ -706,7 +706,19 @@ async function showDashboard(user) {
     return;
   }
 
-  const role = profile.role;
+  ;let role = profile.role;
+
+const { data: farmMembership } = await db
+  .from("farm_members")
+  .select("role")
+  .eq("user_id", user.id)
+  .eq("role", "manager")
+  .limit(1)
+  .maybeSingle();
+
+if (role === "employee" && farmMembership) {
+  role = "manager";
+}
 
   $("welcome").textContent =
     "Welcome, " + (profile.full_name || "User");
